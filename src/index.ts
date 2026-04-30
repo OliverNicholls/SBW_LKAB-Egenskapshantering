@@ -5,7 +5,7 @@ let selectedObjectInfoMap: Map<string, any> = new Map();
 let expandedGroups: Set<string> = new Set();
 let pinnedPsets: Set<string> = new Set();
 let activeTab: 'properties' | 'demolition-stages' | 'demolition-sequence' = 'properties';
-let demolitionStages: Array<{ id: string; name: string; order_index: number }> = [];
+let demolitionStages: Array<{ id: string; name: string; order_index: number; color: string }> = [];
 let elementToStageMap: Map<string, string> = new Map();
 
 function loadPinnedPsets() {
@@ -65,6 +65,21 @@ function renderElementProperties(objInfo: any, guid: string): string {
   if (!objInfo) return '<div style="color: #999; padding: 12px;">No information available</div>';
 
   let html = '';
+  const assignedStageId = elementToStageMap.get(guid);
+  const assignedStage = demolitionStages.find(s => s.id === assignedStageId);
+
+  if (assignedStage) {
+    html += `
+      <div style="margin-bottom: 12px; padding: 10px 12px; border-radius: 4px; border-left: 4px solid ${assignedStage.color}; background: ${assignedStage.color}20;">
+        <div style="font-size: 11px; color: #666; margin-bottom: 4px;">DEMOLITION STAGE</div>
+        <div style="font-weight: 600; color: ${assignedStage.color}; font-size: 13px; display: flex; align-items: center; gap: 8px;">
+          <span style="display: inline-block; width: 12px; height: 12px; border-radius: 2px; background: ${assignedStage.color};"></span>
+          ${assignedStage.name}
+        </div>
+      </div>
+    `;
+  }
+
   let groupIndex = 0;
 
   if (Array.isArray(objInfo.groups)) {
@@ -191,10 +206,13 @@ function renderDemolitionStagesTab(): string {
             .map((stage, index) => `
               <div draggable="true" data-stage-id="${stage.id}" style="display: flex; align-items: center; padding: 12px; border-bottom: ${index < demolitionStages.length - 1 ? '1px solid #eee' : 'none'}; background: white; cursor: move; transition: background-color 0.2s;" class="stage-item">
                 <div style="color: #999; margin-right: 12px; cursor: grab; font-size: 18px;">⋮⋮</div>
-                <div style="background: #0066cc; color: white; border-radius: 50%; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; font-weight: 600; margin-right: 12px; flex-shrink: 0; font-size: 13px;">${index + 1}</div>
+                <div style="background: ${stage.color}; color: white; border-radius: 50%; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; font-weight: 600; margin-right: 12px; flex-shrink: 0; font-size: 13px;">${index + 1}</div>
                 <div style="flex: 1;">
                   <div style="font-weight: 600; color: #333; font-size: 13px;">${stage.name}</div>
                   <div style="font-size: 11px; color: #999;">ID: ${stage.id}</div>
+                </div>
+                <div style="display: flex; align-items: center; gap: 8px; margin-right: 8px;">
+                  <input type="color" data-action="set-stage-color" data-stage-id="${stage.id}" value="${stage.color}" style="width: 40px; height: 32px; border: 1px solid #ddd; border-radius: 3px; cursor: pointer; padding: 0; margin: 0;">
                 </div>
                 <button data-action="remove-stage" data-stage-id="${stage.id}" style="padding: 6px 12px; background: #f44336; color: white; border: none; border-radius: 3px; cursor: pointer; font-size: 12px; font-weight: 600; transition: background-color 0.2s;">Remove</button>
               </div>
@@ -224,40 +242,16 @@ function renderDemolitionSequencingTab(): string {
         ${demolitionStages
           .sort((a, b) => a.order_index - b.order_index)
           .map((stage, index) => `
-            <button data-action="assign-all-to-stage" data-stage-id="${stage.id}" style="padding: 12px 16px; background: #0066cc; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 13px; font-weight: 600; transition: background-color 0.2s; text-align: left; display: flex; align-items: center; gap: 12px;">
+            <button data-action="assign-all-to-stage" data-stage-id="${stage.id}" style="padding: 12px 16px; background: ${stage.color}; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 13px; font-weight: 600; transition: background-color 0.2s; text-align: left; display: flex; align-items: center; gap: 12px;">
               <span style="background: rgba(255,255,255,0.3); border-radius: 50%; width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 12px; font-weight: bold;">${index + 1}</span>
               <span>${stage.name}</span>
             </button>
           `)
           .join('')}
       </div>
-      <div style="margin-bottom: 16px;">
-        <h3 style="margin: 0 0 12px 0; font-size: 14px; color: #333; font-weight: 600;">Selected Elements</h3>
+      <div style="margin-bottom: 16px; padding: 12px; background: #f0f0f0; border-radius: 4px;">
+        <h3 style="margin: 0; font-size: 14px; color: #333; font-weight: 600;">Selected Elements: ${selectedElements.size}</h3>
       </div>
-      ${Array.from(selectedElements.entries()).map(([guid, _elem]) => {
-        const objInfo = selectedObjectInfoMap.get(guid);
-        const entityName = objInfo?.properties?.['Name'] || objInfo?.properties?.['name'] || 'Unknown Element';
-        const assignedStageId = elementToStageMap.get(guid);
-        const assignedStage = demolitionStages.find(s => s.id === assignedStageId);
-
-        return `
-          <div style="margin-bottom: 12px; padding: 12px; border: 1px solid #ddd; border-radius: 4px; background: #fafafa;">
-            <div style="margin-bottom: 8px;">
-              <div style="font-weight: 600; color: #333; font-size: 13px;">${entityName}</div>
-              <div style="font-size: 11px; color: #999; font-family: monospace;">${guid}</div>
-            </div>
-            ${assignedStage ? `
-              <div style="padding: 6px 8px; background: #e3f2fd; border: 1px solid #0066cc; border-radius: 3px; font-size: 12px; color: #0066cc; font-weight: 600;">
-                Assigned to: ${assignedStage.name}
-              </div>
-            ` : `
-              <div style="padding: 6px 8px; background: #fafafa; border: 1px dashed #ccc; border-radius: 3px; font-size: 12px; color: #999;">
-                Not assigned
-              </div>
-            `}
-          </div>
-        `;
-      }).join('')}
       ${elementToStageMap.size > 0 ? `
         <div style="display: flex; gap: 8px; margin-top: 20px; padding-top: 20px; border-top: 1px solid #ddd;">
           <button data-action="export-revit" style="flex: 1; padding: 10px 16px; background: #1976d2; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 13px; font-weight: 600; transition: background-color 0.2s;">Export to Revit Format</button>
@@ -347,10 +341,12 @@ function setupEventListeners() {
         const input = document.getElementById('new-stage-name') as HTMLInputElement;
         const stageName = input?.value.trim();
         if (stageName) {
+          const colors = ['#0066cc', '#d32f2f', '#f57c00', '#fbc02d', '#388e3c', '#7b1fa2', '#00bcd4', '#e91e63'];
           const newStage = {
             id: generateId(),
             name: stageName,
-            order_index: demolitionStages.length
+            order_index: demolitionStages.length,
+            color: colors[demolitionStages.length % colors.length]
           };
           demolitionStages.push(newStage);
           saveDemolitionData();
@@ -391,6 +387,17 @@ function setupEventListeners() {
           saveDemolitionData();
           renderUI();
         }
+      } else if (action === 'set-stage-color') {
+        const stageId = target.getAttribute('data-stage-id');
+        const color = (target as HTMLInputElement).value;
+        if (stageId && color) {
+          const stage = demolitionStages.find(s => s.id === stageId);
+          if (stage) {
+            stage.color = color;
+            saveDemolitionData();
+            renderUI();
+          }
+        }
       }
     });
   });
@@ -427,7 +434,7 @@ function setupEventListeners() {
             stage.order_index = idx;
           }
           return stage;
-        }).filter(s => s !== undefined) as Array<{ id: string; name: string; order_index: number }>;
+        }).filter(s => s !== undefined) as Array<{ id: string; name: string; order_index: number; color: string }>;
         demolitionStages = reorderedStages;
         saveDemolitionData();
       }
@@ -444,6 +451,22 @@ function setupEventListeners() {
           expandedGroups.add(groupId);
         }
         renderUI();
+      }
+    });
+  });
+
+  document.querySelectorAll('input[type="color"][data-action="set-stage-color"]').forEach((input) => {
+    input.addEventListener('change', (e) => {
+      const target = e.target as HTMLInputElement;
+      const stageId = target.getAttribute('data-stage-id');
+      const color = target.value;
+      if (stageId && color) {
+        const stage = demolitionStages.find(s => s.id === stageId);
+        if (stage) {
+          stage.color = color;
+          saveDemolitionData();
+          renderUI();
+        }
       }
     });
   });
