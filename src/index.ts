@@ -199,12 +199,12 @@ function renderFooter(): string {
   return `
     <div style="padding: 12px 20px; background: #1a1a1a; border-top: 1px solid #333; display: flex; justify-content: space-between; align-items: center;">
       <div style="display: flex; align-items: center; gap: 8px; flex: 1;">
-        <img src="/Tikab_Logo_Blue.png" alt="Tikab" style="height: 32px; width: auto;">
+        <img src="./Tikab_Logo_Blue.png" alt="Tikab" style="height: 32px; width: auto; display: block;">
         <span style="font-size: 12px; color: #999;">Developed by Tikab</span>
       </div>
       <div style="display: flex; align-items: center; gap: 8px; flex: 1; justify-content: flex-end;">
         <span style="font-size: 12px; color: #999;">on behalf of</span>
-        <img src="/LKAB_logo_white.svg" alt="LKAB" style="height: 28px; width: auto;">
+        <img src="./LKAB_logo_white.svg" alt="LKAB" style="height: 28px; width: auto; display: block;">
       </div>
     </div>
   `;
