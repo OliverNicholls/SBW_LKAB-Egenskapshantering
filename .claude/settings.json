@@ -15,7 +15,8 @@
       "Bash(curl -s https://api.github.com/repos/OliverNicholls/SBW_IFCChecker/contents/src)",
       "Bash(git commit -m 'Fix: Prevent widget from contracting by re-expanding on didContract *)",
       "WebSearch",
-      "Bash(git commit -m 'Debug: Add console logging to troubleshoot widget persistence *)"
+      "Bash(git commit -m 'Debug: Add console logging to troubleshoot widget persistence *)",
+      "Bash(git commit -m 'Refactor: Display object properties in widget to keep it persistent *)"
     ]
   }
 }

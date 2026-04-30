@@ -1,11 +1,13 @@
 const currentGuidDisplay = document.getElementById('currentGuid');
 const statusDisplay = document.getElementById('status');
 const elementsList = document.getElementById('elementsList');
+const propertiesContainer = document.getElementById('propertiesContainer');
 const clearButton = document.getElementById('clearButton');
 
 const STORAGE_KEY = 'streambim-selected-elements';
 
 let selectedElements = new Set<string>();
+let currentObject: any = null;
 
 function loadFromStorage() {
   const stored = localStorage.getItem(STORAGE_KEY);
@@ -31,6 +33,35 @@ function toggleElement(guid: string) {
   }
   saveToStorage();
   renderElements();
+}
+
+function renderProperties(objectInfo: any) {
+  if (!propertiesContainer) return;
+
+  if (!objectInfo || !objectInfo.properties) {
+    propertiesContainer.innerHTML = '';
+    return;
+  }
+
+  const properties = objectInfo.properties;
+  const entries = Object.entries(properties)
+    .slice(0, 10)
+    .map(
+      ([key, value]) => `
+    <div class="property-item">
+      <div class="property-key">${key}</div>
+      <div class="property-value">${Array.isArray(value) ? value.join(', ') : String(value)}</div>
+    </div>
+  `,
+    )
+    .join('');
+
+  propertiesContainer.innerHTML = `
+    <div class="properties-section">
+      <h3>Properties</h3>
+      ${entries}
+    </div>
+  `;
 }
 
 function renderElements() {
@@ -89,34 +120,31 @@ if (!currentGuidDisplay || !statusDisplay || !elementsList) {
       if (currentGuidDisplay) {
         currentGuidDisplay.textContent = 'No element selected';
       }
+      if (propertiesContainer) {
+        propertiesContainer.innerHTML = '';
+      }
     });
   }
 
   window.StreamBIM.connect({
     pickedObject: (selectedObject: any) => {
-      console.log('pickedObject callback fired:', selectedObject);
       if (selectedObject && selectedObject.guid) {
         currentGuidDisplay.textContent = selectedObject.guid;
         selectedElements.add(selectedObject.guid);
         saveToStorage();
         renderElements();
+
+        window.StreamBIM.getObjectInfo(selectedObject.guid)
+          .then((objectInfo) => {
+            currentObject = objectInfo;
+            renderProperties(objectInfo);
+          })
+          .catch((error) => {
+            console.error('Failed to get object info:', error);
+          });
       } else {
         currentGuidDisplay.textContent = 'No GUID available';
       }
-      console.log('Calling setExpanded(true)');
-      window.StreamBIM.setExpanded(true).catch((e) => {
-        console.error('setExpanded failed:', e);
-      });
-    },
-    didContract: async () => {
-      console.log('didContract callback fired');
-      await window.StreamBIM.setExpanded(true).catch((e) => {
-        console.error('setExpanded in didContract failed:', e);
-      });
-      console.log('Widget tried to contract, re-expanded');
-    },
-    didExpand: () => {
-      console.log('didExpand callback fired');
     },
   })
     .then(() => {

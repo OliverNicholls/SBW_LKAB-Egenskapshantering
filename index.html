@@ -152,6 +152,49 @@
         padding: 20px;
         font-size: 13px;
       }
+
+      .properties-section {
+        background-color: #f9f9f9;
+        border: 1px solid #e0e0e0;
+        border-radius: 4px;
+        padding: 16px;
+        margin-top: 16px;
+        font-size: 13px;
+      }
+
+      .properties-section h3 {
+        margin: 0 0 12px 0;
+        font-size: 13px;
+        color: #666;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+      }
+
+      .property-item {
+        margin-bottom: 12px;
+        padding-bottom: 12px;
+        border-bottom: 1px solid #e0e0e0;
+      }
+
+      .property-item:last-child {
+        margin-bottom: 0;
+        padding-bottom: 0;
+        border-bottom: none;
+      }
+
+      .property-key {
+        font-weight: 600;
+        color: #333;
+        font-size: 12px;
+      }
+
+      .property-value {
+        color: #666;
+        font-size: 12px;
+        word-break: break-word;
+        margin-top: 4px;
+        font-family: 'Courier New', monospace;
+      }
     </style>
     <script src="./node_modules/streambim-widget-api/dist/streambim-widget-api.min.js"></script>
   </head>
@@ -162,6 +205,7 @@
         <div class="info-label">Current Element</div>
         <div class="guid" id="currentGuid">No element selected</div>
       </div>
+      <div id="propertiesContainer"></div>
       <div class="elements-list">
         <h2>Selected Elements</h2>
         <div id="elementsList"></div>
