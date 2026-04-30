@@ -217,8 +217,22 @@ function renderDemolitionSequencingTab(): string {
   return `
     <div style="padding: 20px; overflow-y: auto; flex: 1;">
       <div style="margin-bottom: 16px;">
-        <h2 style="margin: 0 0 12px 0; font-size: 16px; color: #333; font-weight: 600;">Element Assignment</h2>
-        <p style="margin: 0; font-size: 13px; color: #666;">Assign selected elements to demolition stages</p>
+        <h2 style="margin: 0 0 12px 0; font-size: 16px; color: #333; font-weight: 600;">Assign to Stage</h2>
+        <p style="margin: 0 0 12px 0; font-size: 13px; color: #666;">Click a stage button to assign all ${selectedElements.size} selected element${selectedElements.size !== 1 ? 's' : ''}</p>
+      </div>
+      <div style="display: flex; flex-direction: column; gap: 8px; margin-bottom: 20px;">
+        ${demolitionStages
+          .sort((a, b) => a.order_index - b.order_index)
+          .map((stage, index) => `
+            <button data-action="assign-all-to-stage" data-stage-id="${stage.id}" style="padding: 12px 16px; background: #0066cc; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 13px; font-weight: 600; transition: background-color 0.2s; text-align: left; display: flex; align-items: center; gap: 12px;">
+              <span style="background: rgba(255,255,255,0.3); border-radius: 50%; width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 12px; font-weight: bold;">${index + 1}</span>
+              <span>${stage.name}</span>
+            </button>
+          `)
+          .join('')}
+      </div>
+      <div style="margin-bottom: 16px;">
+        <h3 style="margin: 0 0 12px 0; font-size: 14px; color: #333; font-weight: 600;">Selected Elements</h3>
       </div>
       ${Array.from(selectedElements.entries()).map(([guid, _elem]) => {
         const objInfo = selectedObjectInfoMap.get(guid);
@@ -232,13 +246,15 @@ function renderDemolitionSequencingTab(): string {
               <div style="font-weight: 600; color: #333; font-size: 13px;">${entityName}</div>
               <div style="font-size: 11px; color: #999; font-family: monospace;">${guid}</div>
             </div>
-            <select data-action="assign-to-stage" data-guid="${guid}" style="width: 100%; padding: 8px 10px; border: 1px solid #ddd; border-radius: 3px; font-size: 13px; background: white; cursor: pointer;">
-              <option value="">Select a stage...</option>
-              ${demolitionStages
-                .sort((a, b) => a.order_index - b.order_index)
-                .map(stage => `<option value="${stage.id}" ${assignedStageId === stage.id ? 'selected' : ''}>${stage.name}</option>`)
-                .join('')}
-            </select>
+            ${assignedStage ? `
+              <div style="padding: 6px 8px; background: #e3f2fd; border: 1px solid #0066cc; border-radius: 3px; font-size: 12px; color: #0066cc; font-weight: 600;">
+                Assigned to: ${assignedStage.name}
+              </div>
+            ` : `
+              <div style="padding: 6px 8px; background: #fafafa; border: 1px dashed #ccc; border-radius: 3px; font-size: 12px; color: #999;">
+                Not assigned
+              </div>
+            `}
           </div>
         `;
       }).join('')}
@@ -366,22 +382,15 @@ function setupEventListeners() {
           assignments: Array.from(elementToStageMap.entries()).map(([guid, stageId]) => ({ guid, stageId }))
         };
         alert('Export config - Coming soon!\n\nConfig: ' + JSON.stringify(config, null, 2));
-      }
-    });
-  });
-
-  document.querySelectorAll('select[data-action="assign-to-stage"]').forEach((select) => {
-    select.addEventListener('change', (e) => {
-      const target = e.target as HTMLSelectElement;
-      const guid = target.getAttribute('data-guid');
-      const stageId = target.value;
-      if (guid) {
+      } else if (action === 'assign-all-to-stage') {
+        const stageId = target.getAttribute('data-stage-id');
         if (stageId) {
-          elementToStageMap.set(guid, stageId);
-        } else {
-          elementToStageMap.delete(guid);
+          selectedElements.forEach((_elem, guid) => {
+            elementToStageMap.set(guid, stageId);
+          });
+          saveDemolitionData();
+          renderUI();
         }
-        saveDemolitionData();
       }
     });
   });
