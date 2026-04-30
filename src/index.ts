@@ -94,6 +94,7 @@ if (!currentGuidDisplay || !statusDisplay || !elementsList) {
 
   window.StreamBIM.connect({
     pickedObject: (selectedObject: any) => {
+      console.log('pickedObject callback fired:', selectedObject);
       if (selectedObject && selectedObject.guid) {
         currentGuidDisplay.textContent = selectedObject.guid;
         selectedElements.add(selectedObject.guid);
@@ -102,12 +103,20 @@ if (!currentGuidDisplay || !statusDisplay || !elementsList) {
       } else {
         currentGuidDisplay.textContent = 'No GUID available';
       }
-      window.StreamBIM.setExpanded(true);
-      console.log('Selected object:', selectedObject);
+      console.log('Calling setExpanded(true)');
+      window.StreamBIM.setExpanded(true).catch((e) => {
+        console.error('setExpanded failed:', e);
+      });
     },
     didContract: async () => {
-      await window.StreamBIM.setExpanded(true);
-      console.log('Widget tried to contract, re-expanding');
+      console.log('didContract callback fired');
+      await window.StreamBIM.setExpanded(true).catch((e) => {
+        console.error('setExpanded in didContract failed:', e);
+      });
+      console.log('Widget tried to contract, re-expanded');
+    },
+    didExpand: () => {
+      console.log('didExpand callback fired');
     },
   })
     .then(() => {

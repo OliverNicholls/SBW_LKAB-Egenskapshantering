@@ -5,7 +5,17 @@
       "WebFetch(domain:github.com)",
       "WebFetch(domain:raw.githubusercontent.com)",
       "WebFetch(domain:api.github.com)",
-      "Read(//c/c/Users/oliver.nicholls/OneDrive - Tikab Strukturmekanik AB/Dokument/Tikab/Utveckling/**)"
+      "Read(//c/c/Users/oliver.nicholls/OneDrive - Tikab Strukturmekanik AB/Dokument/Tikab/Utveckling/**)",
+      "Bash(npm run *)",
+      "Bash(git add *)",
+      "Bash(git commit -m ' *)",
+      "Bash(git push *)",
+      "Bash(git commit -m 'Fix: Keep widget expanded after element selection *)",
+      "Bash(gh workflow *)",
+      "Bash(curl -s https://api.github.com/repos/OliverNicholls/SBW_IFCChecker/contents/src)",
+      "Bash(git commit -m 'Fix: Prevent widget from contracting by re-expanding on didContract *)",
+      "WebSearch",
+      "Bash(git commit -m 'Debug: Add console logging to troubleshoot widget persistence *)"
     ]
   }
 }
