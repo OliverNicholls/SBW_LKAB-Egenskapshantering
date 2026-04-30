@@ -197,17 +197,14 @@ function renderDemolitionSequencingTab(): string {
 
 function renderFooter(): string {
   return `
-    <div style="padding: 16px 20px; background: #f5f5f5; border-top: 1px solid #ddd; display: flex; justify-content: space-between; align-items: center; font-size: 12px; color: #666;">
-      <div style="display: flex; align-items: center; gap: 12px;">
-        <img src="/Tikab_Logo_Blue.png" alt="Tikab" style="height: 24px;">
-        <span>Developed by <strong>Tikab</strong></span>
+    <div style="padding: 12px 20px; background: #1a1a1a; border-top: 1px solid #333; display: flex; justify-content: space-between; align-items: center;">
+      <div style="display: flex; align-items: center; gap: 8px; flex: 1;">
+        <img src="/Tikab_Logo_Blue.png" alt="Tikab" style="height: 32px; width: auto;">
+        <span style="font-size: 12px; color: #999;">Developed by Tikab</span>
       </div>
-      <div style="display: flex; align-items: center; gap: 8px;">
-        <span>on behalf of</span>
-        <svg viewBox="0 0 100 30" style="height: 20px; width: auto;">
-          <rect width="100" height="30" fill="#0066cc"/>
-          <text x="50" y="22" font-size="16" font-weight="bold" fill="white" text-anchor="middle">LKAB</text>
-        </svg>
+      <div style="display: flex; align-items: center; gap: 8px; flex: 1; justify-content: flex-end;">
+        <span style="font-size: 12px; color: #999;">on behalf of</span>
+        <img src="/LKAB_logo_white.svg" alt="LKAB" style="height: 28px; width: auto;">
       </div>
     </div>
   `;
