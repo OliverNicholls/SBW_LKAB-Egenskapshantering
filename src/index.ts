@@ -105,6 +105,10 @@ if (!currentGuidDisplay || !statusDisplay || !elementsList) {
       window.StreamBIM.setExpanded(true);
       console.log('Selected object:', selectedObject);
     },
+    didContract: async () => {
+      await window.StreamBIM.setExpanded(true);
+      console.log('Widget tried to contract, re-expanding');
+    },
   })
     .then(() => {
       statusDisplay.textContent = 'Connected to StreamBIM';
