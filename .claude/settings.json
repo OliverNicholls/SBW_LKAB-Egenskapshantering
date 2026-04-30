@@ -36,6 +36,9 @@
       "Bash(curl -s \"https://raw.githubusercontent.com/OliverNicholls/SBW_IFCChecker/master/.github/workflows/deploy.yml\")",
       "Bash(mkdir -p public/lib)",
       "Bash(cp node_modules/streambim-widget-api/dist/streambim-widget-api.min.js public/lib/)"
+    ],
+    "additionalDirectories": [
+      "c:\\c\\Users\\oliver.nicholls\\OneDrive - Tikab Strukturmekanik AB\\Dokument\\Tikab\\Utveckling\\0009_Egenskapshantering"
     ]
   }
 }

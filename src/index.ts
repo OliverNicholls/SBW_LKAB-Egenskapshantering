@@ -169,7 +169,7 @@ function renderDemolitionSequencingTab(): string {
         ${demolitionSequence.length > 0 ? `<button data-action="clear-sequence" style="padding: 10px 16px; background: #f44336; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 13px; font-weight: 600; transition: background-color 0.2s;">Clear Sequence</button>` : ''}
       </div>
       ${demolitionSequence.length > 0 ? `
-        <div style="border: 1px solid #ddd; border-radius: 4px; overflow: hidden;">
+        <div style="border: 1px solid #ddd; border-radius: 4px; overflow: hidden; margin-bottom: 20px;">
           ${demolitionSequence.map((guid, index) => {
             const elem = selectedElements.get(guid);
             const objInfo = selectedObjectInfoMap.get(guid);
@@ -186,7 +186,29 @@ function renderDemolitionSequencingTab(): string {
             `;
           }).join('')}
         </div>
+        <div style="display: flex; gap: 8px; margin-bottom: 20px;">
+          <button data-action="export-revit" style="flex: 1; padding: 10px 16px; background: #1976d2; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 13px; font-weight: 600; transition: background-color 0.2s;">Export to Revit Format</button>
+          <button data-action="export-config" style="flex: 1; padding: 10px 16px; background: #388e3c; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 13px; font-weight: 600; transition: background-color 0.2s;">Export Config</button>
+        </div>
       ` : ''}
+    </div>
+  `;
+}
+
+function renderFooter(): string {
+  return `
+    <div style="padding: 16px 20px; background: #f5f5f5; border-top: 1px solid #ddd; display: flex; justify-content: space-between; align-items: center; font-size: 12px; color: #666;">
+      <div style="display: flex; align-items: center; gap: 12px;">
+        <img src="/Tikab_Logo_Blue.png" alt="Tikab" style="height: 24px;">
+        <span>Developed by <strong>Tikab</strong></span>
+      </div>
+      <div style="display: flex; align-items: center; gap: 8px;">
+        <span>on behalf of</span>
+        <svg viewBox="0 0 100 30" style="height: 20px; width: auto;">
+          <rect width="100" height="30" fill="#0066cc"/>
+          <text x="50" y="22" font-size="16" font-weight="bold" fill="white" text-anchor="middle">LKAB</text>
+        </svg>
+      </div>
     </div>
   `;
 }
@@ -199,6 +221,7 @@ function renderUI() {
       <div style="flex: 1; overflow-y: auto; display: flex; flex-direction: column;">
         ${content}
       </div>
+      ${renderFooter()}
     </div>
   `;
   setupEventListeners();
@@ -251,6 +274,12 @@ function setupEventListeners() {
           demolitionSequence = demolitionSequence.filter((g) => g !== guid);
           renderUI();
         }
+      } else if (action === 'export-revit') {
+        console.log('Export to Revit format:', demolitionSequence);
+        alert('Export to Revit format - Coming soon!\n\nSequence: ' + demolitionSequence.join(', '));
+      } else if (action === 'export-config') {
+        console.log('Export config:', demolitionSequence);
+        alert('Export config - Coming soon!\n\nSequence: ' + JSON.stringify({ demolitionSequence }, null, 2));
       }
     });
   });
