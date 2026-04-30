@@ -4,8 +4,9 @@ let selectedElements: Map<string, any> = new Map();
 let selectedObjectInfoMap: Map<string, any> = new Map();
 let expandedGroups: Set<string> = new Set();
 let pinnedPsets: Set<string> = new Set();
-let activeTab: 'properties' | 'demolition' = 'properties';
-let demolitionSequence: string[] = [];
+let activeTab: 'properties' | 'demolition-stages' | 'demolition-sequence' = 'properties';
+let demolitionStages: Array<{ id: string; name: string; order_index: number }> = [];
+let elementToStageMap: Map<string, string> = new Map();
 
 function loadPinnedPsets() {
   const stored = localStorage.getItem('pinnedPsets');
@@ -16,6 +17,22 @@ function loadPinnedPsets() {
 
 function savePinnedPsets() {
   localStorage.setItem('pinnedPsets', JSON.stringify(Array.from(pinnedPsets)));
+}
+
+function loadDemolitionData() {
+  const stagesStored = localStorage.getItem('demolitionStages');
+  if (stagesStored) {
+    demolitionStages = JSON.parse(stagesStored);
+  }
+  const mappingStored = localStorage.getItem('elementToStageMap');
+  if (mappingStored) {
+    elementToStageMap = new Map(JSON.parse(mappingStored));
+  }
+}
+
+function saveDemolitionData() {
+  localStorage.setItem('demolitionStages', JSON.stringify(demolitionStages));
+  localStorage.setItem('elementToStageMap', JSON.stringify(Array.from(elementToStageMap.entries())));
 }
 
 function formatValue(value: any, unit?: string): string {
@@ -34,8 +51,11 @@ function renderHeader(): string {
       <button data-tab="properties" style="flex: 1; padding: 14px 16px; background: ${activeTab === 'properties' ? 'white' : '#f5f5f5'}; color: ${activeTab === 'properties' ? '#0066cc' : '#666'}; border: none; border-bottom: ${activeTab === 'properties' ? '3px solid #0066cc' : 'none'}; cursor: pointer; font-size: 13px; font-weight: 600; transition: all 0.2s;">
         Properties
       </button>
-      <button data-tab="demolition" style="flex: 1; padding: 14px 16px; background: ${activeTab === 'demolition' ? 'white' : '#f5f5f5'}; color: ${activeTab === 'demolition' ? '#0066cc' : '#666'}; border: none; border-bottom: ${activeTab === 'demolition' ? '3px solid #0066cc' : 'none'}; cursor: pointer; font-size: 13px; font-weight: 600; transition: all 0.2s;">
-        Demolition Sequencing
+      <button data-tab="demolition-stages" style="flex: 1; padding: 14px 16px; background: ${activeTab === 'demolition-stages' ? 'white' : '#f5f5f5'}; color: ${activeTab === 'demolition-stages' ? '#0066cc' : '#666'}; border: none; border-bottom: ${activeTab === 'demolition-stages' ? '3px solid #0066cc' : 'none'}; cursor: pointer; font-size: 13px; font-weight: 600; transition: all 0.2s;">
+        Demolition Stages
+      </button>
+      <button data-tab="demolition-sequence" style="flex: 1; padding: 14px 16px; background: ${activeTab === 'demolition-sequence' ? 'white' : '#f5f5f5'}; color: ${activeTab === 'demolition-sequence' ? '#0066cc' : '#666'}; border: none; border-bottom: ${activeTab === 'demolition-sequence' ? '3px solid #0066cc' : 'none'}; cursor: pointer; font-size: 13px; font-weight: 600; transition: all 0.2s;">
+        Demolition Sequence
       </button>
     </div>
   `;
@@ -149,44 +169,81 @@ function renderPropertiesTab(): string {
   `;
 }
 
+function renderDemolitionStagesTab(): string {
+  return `
+    <div style="padding: 20px; overflow-y: auto; flex: 1;">
+      <div style="margin-bottom: 16px;">
+        <h2 style="margin: 0 0 12px 0; font-size: 16px; color: #333; font-weight: 600;">Demolition Stages (${demolitionStages.length})</h2>
+        <p style="margin: 0; font-size: 13px; color: #666;">Define the stages of demolition and arrange them in order</p>
+      </div>
+      <div style="margin-bottom: 16px; display: flex; gap: 8px;">
+        <input type="text" id="new-stage-name" placeholder="Stage name (e.g., Site Prep)" style="flex: 1; padding: 10px 12px; border: 1px solid #ddd; border-radius: 4px; font-size: 13px;">
+        <button data-action="add-stage" style="padding: 10px 16px; background: #4caf50; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 13px; font-weight: 600; transition: background-color 0.2s;">Add Stage</button>
+      </div>
+      ${demolitionStages.length === 0 ? `
+        <div style="padding: 20px; background: #f5f5f5; border-radius: 4px; text-align: center; color: #999; font-size: 13px;">
+          <p style="margin: 0;">No stages defined yet. Create your first demolition stage above.</p>
+        </div>
+      ` : `
+        <div style="border: 1px solid #ddd; border-radius: 4px; overflow: hidden;">
+          ${demolitionStages
+            .sort((a, b) => a.order_index - b.order_index)
+            .map((stage, index) => `
+              <div draggable="true" data-stage-id="${stage.id}" style="display: flex; align-items: center; padding: 12px; border-bottom: ${index < demolitionStages.length - 1 ? '1px solid #eee' : 'none'}; background: white; cursor: move; transition: background-color 0.2s;" class="stage-item">
+                <div style="color: #999; margin-right: 12px; cursor: grab; font-size: 18px;">⋮⋮</div>
+                <div style="background: #0066cc; color: white; border-radius: 50%; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; font-weight: 600; margin-right: 12px; flex-shrink: 0; font-size: 13px;">${index + 1}</div>
+                <div style="flex: 1;">
+                  <div style="font-weight: 600; color: #333; font-size: 13px;">${stage.name}</div>
+                  <div style="font-size: 11px; color: #999;">ID: ${stage.id}</div>
+                </div>
+                <button data-action="remove-stage" data-stage-id="${stage.id}" style="padding: 6px 12px; background: #f44336; color: white; border: none; border-radius: 3px; cursor: pointer; font-size: 12px; font-weight: 600; transition: background-color 0.2s;">Remove</button>
+              </div>
+            `).join('')}
+        </div>
+      `}
+    </div>
+  `;
+}
+
 function renderDemolitionSequencingTab(): string {
+  if (demolitionStages.length === 0) {
+    return '<div style="color: #999; padding: 40px 20px; text-align: center; flex: 1; display: flex; align-items: center; justify-content: center;">Create demolition stages first in the "Demolition Stages" tab</div>';
+  }
+
   if (selectedElements.size === 0) {
-    return '<div style="color: #999; padding: 40px 20px; text-align: center; flex: 1; display: flex; align-items: center; justify-content: center;">Select elements to create a demolition sequence</div>';
+    return '<div style="color: #999; padding: 40px 20px; text-align: center; flex: 1; display: flex; align-items: center; justify-content: center;">Select elements to assign them to demolition stages</div>';
   }
 
   return `
     <div style="padding: 20px; overflow-y: auto; flex: 1;">
       <div style="margin-bottom: 16px;">
-        <h2 style="margin: 0 0 12px 0; font-size: 16px; color: #333; font-weight: 600;">Demolition Sequence (${demolitionSequence.length}/${selectedElements.size})</h2>
+        <h2 style="margin: 0 0 12px 0; font-size: 16px; color: #333; font-weight: 600;">Element Assignment</h2>
+        <p style="margin: 0; font-size: 13px; color: #666;">Assign selected elements to demolition stages</p>
       </div>
-      ${demolitionSequence.length === 0 ? `
-        <div style="padding: 20px; background: #e3f2fd; border-radius: 4px; margin-bottom: 16px; text-align: center; color: #0066cc; font-size: 13px;">
-          <p style="margin: 0;">Add selected elements to the demolition sequence below</p>
-        </div>
-      ` : ''}
-      <div style="margin-bottom: 16px; display: flex; gap: 8px;">
-        <button data-action="add-to-sequence" style="padding: 10px 16px; background: #4caf50; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 13px; font-weight: 600; transition: background-color 0.2s;">Add Selected to Sequence</button>
-        ${demolitionSequence.length > 0 ? `<button data-action="clear-sequence" style="padding: 10px 16px; background: #f44336; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 13px; font-weight: 600; transition: background-color 0.2s;">Clear Sequence</button>` : ''}
-      </div>
-      ${demolitionSequence.length > 0 ? `
-        <div style="border: 1px solid #ddd; border-radius: 4px; overflow: hidden; margin-bottom: 20px;">
-          ${demolitionSequence.map((guid, index) => {
-            const elem = selectedElements.get(guid);
-            const objInfo = selectedObjectInfoMap.get(guid);
-            const entityName = objInfo?.properties?.['Name'] || objInfo?.properties?.['name'] || 'Unknown Element';
-            return `
-              <div style="display: flex; align-items: center; padding: 12px; border-bottom: ${index < demolitionSequence.length - 1 ? '1px solid #eee' : 'none'}; background: ${index % 2 === 0 ? '#fafafa' : 'white'}; transition: background-color 0.2s;">
-                <div style="background: #0066cc; color: white; border-radius: 50%; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; font-weight: 600; margin-right: 12px; flex-shrink: 0; font-size: 13px;">${index + 1}</div>
-                <div style="flex: 1;">
-                  <div style="font-weight: 600; color: #333; font-size: 13px;">${entityName}</div>
-                  <div style="font-size: 11px; color: #999; font-family: monospace;">${guid}</div>
-                </div>
-                <button data-action="remove-from-sequence" data-guid="${guid}" style="padding: 6px 12px; background: #f44336; color: white; border: none; border-radius: 3px; cursor: pointer; font-size: 12px; font-weight: 600; transition: background-color 0.2s;">Remove</button>
-              </div>
-            `;
-          }).join('')}
-        </div>
-        <div style="display: flex; gap: 8px; margin-bottom: 20px;">
+      ${Array.from(selectedElements.entries()).map(([guid, _elem]) => {
+        const objInfo = selectedObjectInfoMap.get(guid);
+        const entityName = objInfo?.properties?.['Name'] || objInfo?.properties?.['name'] || 'Unknown Element';
+        const assignedStageId = elementToStageMap.get(guid);
+        const assignedStage = demolitionStages.find(s => s.id === assignedStageId);
+
+        return `
+          <div style="margin-bottom: 12px; padding: 12px; border: 1px solid #ddd; border-radius: 4px; background: #fafafa;">
+            <div style="margin-bottom: 8px;">
+              <div style="font-weight: 600; color: #333; font-size: 13px;">${entityName}</div>
+              <div style="font-size: 11px; color: #999; font-family: monospace;">${guid}</div>
+            </div>
+            <select data-action="assign-to-stage" data-guid="${guid}" style="width: 100%; padding: 8px 10px; border: 1px solid #ddd; border-radius: 3px; font-size: 13px; background: white; cursor: pointer;">
+              <option value="">Select a stage...</option>
+              ${demolitionStages
+                .sort((a, b) => a.order_index - b.order_index)
+                .map(stage => `<option value="${stage.id}" ${assignedStageId === stage.id ? 'selected' : ''}>${stage.name}</option>`)
+                .join('')}
+            </select>
+          </div>
+        `;
+      }).join('')}
+      ${elementToStageMap.size > 0 ? `
+        <div style="display: flex; gap: 8px; margin-top: 20px; padding-top: 20px; border-top: 1px solid #ddd;">
           <button data-action="export-revit" style="flex: 1; padding: 10px 16px; background: #1976d2; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 13px; font-weight: 600; transition: background-color 0.2s;">Export to Revit Format</button>
           <button data-action="export-config" style="flex: 1; padding: 10px 16px; background: #388e3c; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 13px; font-weight: 600; transition: background-color 0.2s;">Export Config</button>
         </div>
@@ -211,7 +268,15 @@ function renderFooter(): string {
 }
 
 function renderUI() {
-  const content = activeTab === 'properties' ? renderPropertiesTab() : renderDemolitionSequencingTab();
+  let content = '';
+  if (activeTab === 'properties') {
+    content = renderPropertiesTab();
+  } else if (activeTab === 'demolition-stages') {
+    content = renderDemolitionStagesTab();
+  } else {
+    content = renderDemolitionSequencingTab();
+  }
+
   app.innerHTML = `
     <div style="display: flex; flex-direction: column; height: 100vh; background: white;">
       ${renderHeader()}
@@ -224,10 +289,14 @@ function renderUI() {
   setupEventListeners();
 }
 
+function generateId(): string {
+  return 'stage-' + Math.random().toString(36).substr(2, 9);
+}
+
 function setupEventListeners() {
   document.querySelectorAll('[data-tab]').forEach((btn) => {
     btn.addEventListener('click', (e) => {
-      const tab = (e.target as HTMLElement).getAttribute('data-tab') as 'properties' | 'demolition';
+      const tab = (e.target as HTMLElement).getAttribute('data-tab') as 'properties' | 'demolition-stages' | 'demolition-sequence';
       activeTab = tab;
       renderUI();
     });
@@ -236,16 +305,19 @@ function setupEventListeners() {
   document.querySelectorAll('[data-action]').forEach((btn) => {
     btn.addEventListener('click', (e) => {
       const action = (e.target as HTMLElement).getAttribute('data-action');
+      const target = e.target as HTMLElement;
+
       if (action === 'clear-all') {
         selectedElements.clear();
         selectedObjectInfoMap.clear();
-        demolitionSequence = [];
+        elementToStageMap.clear();
         window.StreamBIM.deHighlightAllObjects().catch((err: any) => {
           console.warn('Could not clear highlights:', err);
         });
+        saveDemolitionData();
         renderUI();
       } else if (action === 'toggle-pin-pset') {
-        const pset = (e.target as HTMLElement).getAttribute('data-pset');
+        const pset = target.getAttribute('data-pset');
         if (pset) {
           if (pinnedPsets.has(pset)) {
             pinnedPsets.delete(pset);
@@ -255,28 +327,100 @@ function setupEventListeners() {
           savePinnedPsets();
           renderUI();
         }
-      } else if (action === 'add-to-sequence') {
-        selectedElements.forEach((_, guid) => {
-          if (!demolitionSequence.includes(guid)) {
-            demolitionSequence.push(guid);
-          }
-        });
-        renderUI();
-      } else if (action === 'clear-sequence') {
-        demolitionSequence = [];
-        renderUI();
-      } else if (action === 'remove-from-sequence') {
-        const guid = (e.target as HTMLElement).getAttribute('data-guid');
-        if (guid) {
-          demolitionSequence = demolitionSequence.filter((g) => g !== guid);
+      } else if (action === 'add-stage') {
+        const input = document.getElementById('new-stage-name') as HTMLInputElement;
+        const stageName = input?.value.trim();
+        if (stageName) {
+          const newStage = {
+            id: generateId(),
+            name: stageName,
+            order_index: demolitionStages.length
+          };
+          demolitionStages.push(newStage);
+          saveDemolitionData();
+          renderUI();
+        }
+      } else if (action === 'remove-stage') {
+        const stageId = target.getAttribute('data-stage-id');
+        if (stageId) {
+          demolitionStages = demolitionStages.filter(s => s.id !== stageId);
+          elementToStageMap.forEach((value, key) => {
+            if (value === stageId) {
+              elementToStageMap.delete(key);
+            }
+          });
+          saveDemolitionData();
           renderUI();
         }
       } else if (action === 'export-revit') {
-        console.log('Export to Revit format:', demolitionSequence);
-        alert('Export to Revit format - Coming soon!\n\nSequence: ' + demolitionSequence.join(', '));
+        console.log('Export to Revit format:', Array.from(elementToStageMap.entries()));
+        const data = Array.from(elementToStageMap.entries()).map(([guid, stageId]) => {
+          const stage = demolitionStages.find(s => s.id === stageId);
+          return { guid, stage: stage?.name || 'Unknown' };
+        });
+        alert('Export to Revit format - Coming soon!\n\nAssignments: ' + JSON.stringify(data, null, 2));
       } else if (action === 'export-config') {
-        console.log('Export config:', demolitionSequence);
-        alert('Export config - Coming soon!\n\nSequence: ' + JSON.stringify({ demolitionSequence }, null, 2));
+        console.log('Export config:', { demolitionStages, elementToStageMap: Array.from(elementToStageMap.entries()) });
+        const config = {
+          stages: demolitionStages,
+          assignments: Array.from(elementToStageMap.entries()).map(([guid, stageId]) => ({ guid, stageId }))
+        };
+        alert('Export config - Coming soon!\n\nConfig: ' + JSON.stringify(config, null, 2));
+      }
+    });
+  });
+
+  document.querySelectorAll('select[data-action="assign-to-stage"]').forEach((select) => {
+    select.addEventListener('change', (e) => {
+      const target = e.target as HTMLSelectElement;
+      const guid = target.getAttribute('data-guid');
+      const stageId = target.value;
+      if (guid) {
+        if (stageId) {
+          elementToStageMap.set(guid, stageId);
+        } else {
+          elementToStageMap.delete(guid);
+        }
+        saveDemolitionData();
+      }
+    });
+  });
+
+  const stageItems = document.querySelectorAll('.stage-item');
+  let draggedStage: HTMLElement | null = null;
+
+  stageItems.forEach((item) => {
+    item.addEventListener('dragstart', (e) => {
+      draggedStage = item as HTMLElement;
+      (item as HTMLElement).style.opacity = '0.5';
+    });
+
+    item.addEventListener('dragend', () => {
+      (item as HTMLElement).style.opacity = '1';
+      draggedStage = null;
+    });
+
+    item.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      if (draggedStage && draggedStage !== item) {
+        const dragEvent = e as DragEvent;
+        const rect = (item as HTMLElement).getBoundingClientRect();
+        const midpoint = rect.top + rect.height / 2;
+        if (dragEvent.clientY < midpoint) {
+          item.parentNode?.insertBefore(draggedStage, item);
+        } else {
+          item.parentNode?.insertBefore(draggedStage, item.nextSibling);
+        }
+        const reorderedStages = Array.from(document.querySelectorAll('.stage-item')).map((el, idx) => {
+          const stageId = (el as HTMLElement).getAttribute('data-stage-id');
+          const stage = demolitionStages.find(s => s.id === stageId);
+          if (stage) {
+            stage.order_index = idx;
+          }
+          return stage;
+        }).filter(s => s !== undefined) as Array<{ id: string; name: string; order_index: number }>;
+        demolitionStages = reorderedStages;
+        saveDemolitionData();
       }
     });
   });
@@ -297,6 +441,7 @@ function setupEventListeners() {
 }
 
 loadPinnedPsets();
+loadDemolitionData();
 
 window.StreamBIM.connect({
   pickedObject: (element: any) => {
