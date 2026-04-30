@@ -16,7 +16,26 @@
       "Bash(git commit -m 'Fix: Prevent widget from contracting by re-expanding on didContract *)",
       "WebSearch",
       "Bash(git commit -m 'Debug: Add console logging to troubleshoot widget persistence *)",
-      "Bash(git commit -m 'Refactor: Display object properties in widget to keep it persistent *)"
+      "Bash(git commit -m 'Refactor: Display object properties in widget to keep it persistent *)",
+      "Bash(curl -s \"https://raw.githubusercontent.com/OliverNicholls/SBW_IFCChecker/main/index.html\")",
+      "Bash(curl -s \"https://raw.githubusercontent.com/OliverNicholls/SBW_IFCChecker/main/src/index.ts\")",
+      "Bash(curl -s \"https://raw.githubusercontent.com/OliverNicholls/SBW_IFCChecker/main/package.json\")",
+      "Bash(curl -s \"https://raw.githubusercontent.com/OliverNicholls/SBW_IFCChecker/main/vite.config.ts\")",
+      "Bash(curl -s \"https://api.github.com/repos/OliverNicholls/SBW_IFCChecker/git/trees/main?recursive=1\")",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" \"https://github.com/OliverNicholls/SBW_IFCChecker\")",
+      "Bash(curl -s \"https://api.github.com/repos/OliverNicholls/SBW_IFCChecker\")",
+      "Bash(curl -s \"https://raw.githubusercontent.com/OliverNicholls/SBW_IFCChecker/master/index.html\")",
+      "Bash(curl -s \"https://raw.githubusercontent.com/OliverNicholls/SBW_IFCChecker/master/src/index.ts\")",
+      "Bash(curl -s \"https://raw.githubusercontent.com/OliverNicholls/SBW_IFCChecker/master/package.json\")",
+      "Bash(curl -s \"https://raw.githubusercontent.com/OliverNicholls/SBW_IFCChecker/master/vite.config.ts\")",
+      "Bash(curl -s \"https://api.github.com/repos/OliverNicholls/SBW_IFCChecker/git/trees/master?recursive=1\")",
+      "Bash(curl -s \"https://raw.githubusercontent.com/OliverNicholls/SBW_IFCChecker/master/src/dataService.ts\")",
+      "Bash(curl -s \"https://raw.githubusercontent.com/OliverNicholls/SBW_IFCChecker/master/src/streambim-widget-api.d.ts\")",
+      "Bash(curl -s \"https://raw.githubusercontent.com/OliverNicholls/SBW_IFCChecker/master/tsconfig.json\")",
+      "Bash(curl -s \"https://raw.githubusercontent.com/OliverNicholls/SBW_IFCChecker/master/example-checks.json\")",
+      "Bash(curl -s \"https://raw.githubusercontent.com/OliverNicholls/SBW_IFCChecker/master/.github/workflows/deploy.yml\")",
+      "Bash(mkdir -p public/lib)",
+      "Bash(cp node_modules/streambim-widget-api/dist/streambim-widget-api.min.js public/lib/)"
     ]
   }
 }
