@@ -102,6 +102,7 @@ if (!currentGuidDisplay || !statusDisplay || !elementsList) {
       } else {
         currentGuidDisplay.textContent = 'No GUID available';
       }
+      window.StreamBIM.setExpanded(true);
       console.log('Selected object:', selectedObject);
     },
   })
