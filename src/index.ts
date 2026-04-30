@@ -145,6 +145,14 @@ if (!currentGuidDisplay || !statusDisplay || !elementsList) {
       } else {
         currentGuidDisplay.textContent = 'No GUID available';
       }
+      window.StreamBIM.setExpanded(true).catch((e) => {
+        console.error('setExpanded failed:', e);
+      });
+    },
+    didContract: async () => {
+      await window.StreamBIM.setExpanded(true).catch((e) => {
+        console.error('setExpanded in didContract failed:', e);
+      });
     },
   })
     .then(() => {
