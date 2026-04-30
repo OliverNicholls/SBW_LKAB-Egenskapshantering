@@ -4,6 +4,8 @@ let selectedElements: Map<string, any> = new Map();
 let selectedObjectInfoMap: Map<string, any> = new Map();
 let expandedGroups: Set<string> = new Set();
 let pinnedPsets: Set<string> = new Set();
+let activeTab: 'properties' | 'demolition' = 'properties';
+let demolitionSequence: string[] = [];
 
 function loadPinnedPsets() {
   const stored = localStorage.getItem('pinnedPsets');
@@ -24,9 +26,17 @@ function formatValue(value: any, unit?: string): string {
 
 function renderHeader(): string {
   return `
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; padding-bottom: 16px; border-bottom: 1px solid #ddd;">
-      <h1 style="margin: 0; font-size: 20px; color: #333;">StreamBIM Properties</h1>
-      ${selectedElements.size > 0 ? `<button data-action="clear-all" style="padding: 8px 16px; background: #f44336; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 13px; font-weight: 600;">Clear All</button>` : ''}
+    <div style="margin-bottom: 20px;">
+      <h1 style="margin: 0 0 16px 0; font-size: 20px; color: #333;">StreamBIM Widget</h1>
+      <div style="display: flex; gap: 8px; border-bottom: 2px solid #ddd; padding-bottom: 0;">
+        <button data-tab="properties" style="padding: 12px 16px; background: ${activeTab === 'properties' ? '#0066cc' : '#f0f0f0'}; color: ${activeTab === 'properties' ? 'white' : '#666'}; border: none; cursor: pointer; font-size: 13px; font-weight: 600; border-bottom: ${activeTab === 'properties' ? '3px solid #0066cc' : 'none'}; margin-bottom: -2px;">
+          Properties
+        </button>
+        <button data-tab="demolition" style="padding: 12px 16px; background: ${activeTab === 'demolition' ? '#0066cc' : '#f0f0f0'}; color: ${activeTab === 'demolition' ? 'white' : '#666'}; border: none; cursor: pointer; font-size: 13px; font-weight: 600; border-bottom: ${activeTab === 'demolition' ? '3px solid #0066cc' : 'none'}; margin-bottom: -2px;">
+          Demolition Sequencing
+        </button>
+        ${selectedElements.size > 0 ? `<div style="flex: 1;"></div><button data-action="clear-all" style="padding: 8px 16px; background: #f44336; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 13px; font-weight: 600;">Clear All</button>` : ''}
+      </div>
     </div>
   `;
 }
@@ -137,18 +147,68 @@ function renderPropertiesTab(): string {
   `;
 }
 
+function renderDemolitionSequencingTab(): string {
+  if (selectedElements.size === 0) {
+    return '<div style="color: #999; padding: 16px; text-align: center; margin-top: 40px;">Select elements to create a demolition sequence</div>';
+  }
+
+  return `
+    <div style="margin-top: 20px;">
+      <h2 style="margin: 0 0 16px 0; font-size: 16px; color: #333;">Demolition Sequence (${demolitionSequence.length}/${selectedElements.size})</h2>
+      ${demolitionSequence.length === 0 ? `
+        <div style="padding: 20px; background: #e3f2fd; border-radius: 4px; margin-bottom: 16px; text-align: center; color: #0066cc;">
+          <p style="margin: 0; font-size: 13px;">Add selected elements to the demolition sequence below</p>
+        </div>
+      ` : ''}
+      <div style="margin-bottom: 16px;">
+        <button data-action="add-to-sequence" style="padding: 10px 16px; background: #4caf50; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 13px; font-weight: 600; margin-right: 8px;">Add Selected to Sequence</button>
+        ${demolitionSequence.length > 0 ? `<button data-action="clear-sequence" style="padding: 10px 16px; background: #f44336; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 13px; font-weight: 600;">Clear Sequence</button>` : ''}
+      </div>
+      ${demolitionSequence.length > 0 ? `
+        <div style="border: 1px solid #ddd; border-radius: 4px; overflow: hidden;">
+          ${demolitionSequence.map((guid, index) => {
+            const elem = selectedElements.get(guid);
+            const objInfo = selectedObjectInfoMap.get(guid);
+            const entityName = objInfo?.properties?.['Name'] || objInfo?.properties?.['name'] || 'Unknown Element';
+            return `
+              <div style="display: flex; align-items: center; padding: 12px; border-bottom: ${index < demolitionSequence.length - 1 ? '1px solid #eee' : 'none'}; background: ${index % 2 === 0 ? '#fafafa' : 'white'};">
+                <div style="background: #0066cc; color: white; border-radius: 50%; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; font-weight: bold; margin-right: 12px; flex-shrink: 0;">${index + 1}</div>
+                <div style="flex: 1;">
+                  <div style="font-weight: 600; color: #333; font-size: 13px;">${entityName}</div>
+                  <div style="font-size: 11px; color: #999; font-family: monospace;">${guid}</div>
+                </div>
+                <button data-action="remove-from-sequence" data-guid="${guid}" style="padding: 6px 12px; background: #f44336; color: white; border: none; border-radius: 3px; cursor: pointer; font-size: 12px;">Remove</button>
+              </div>
+            `;
+          }).join('')}
+        </div>
+      ` : ''}
+    </div>
+  `;
+}
+
 function renderUI() {
-  app.innerHTML = renderHeader() + renderPropertiesTab();
+  const content = activeTab === 'properties' ? renderPropertiesTab() : renderDemolitionSequencingTab();
+  app.innerHTML = renderHeader() + content;
   setupEventListeners();
 }
 
 function setupEventListeners() {
+  document.querySelectorAll('[data-tab]').forEach((btn) => {
+    btn.addEventListener('click', (e) => {
+      const tab = (e.target as HTMLElement).getAttribute('data-tab') as 'properties' | 'demolition';
+      activeTab = tab;
+      renderUI();
+    });
+  });
+
   document.querySelectorAll('[data-action]').forEach((btn) => {
     btn.addEventListener('click', (e) => {
       const action = (e.target as HTMLElement).getAttribute('data-action');
       if (action === 'clear-all') {
         selectedElements.clear();
         selectedObjectInfoMap.clear();
+        demolitionSequence = [];
         window.StreamBIM.deHighlightAllObjects().catch((err: any) => {
           console.warn('Could not clear highlights:', err);
         });
@@ -162,6 +222,22 @@ function setupEventListeners() {
             pinnedPsets.add(pset);
           }
           savePinnedPsets();
+          renderUI();
+        }
+      } else if (action === 'add-to-sequence') {
+        selectedElements.forEach((_, guid) => {
+          if (!demolitionSequence.includes(guid)) {
+            demolitionSequence.push(guid);
+          }
+        });
+        renderUI();
+      } else if (action === 'clear-sequence') {
+        demolitionSequence = [];
+        renderUI();
+      } else if (action === 'remove-from-sequence') {
+        const guid = (e.target as HTMLElement).getAttribute('data-guid');
+        if (guid) {
+          demolitionSequence = demolitionSequence.filter((g) => g !== guid);
           renderUI();
         }
       }
