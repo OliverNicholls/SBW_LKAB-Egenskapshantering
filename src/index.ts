@@ -440,24 +440,24 @@ function setupEventListeners() {
         const stageId = target.getAttribute('data-stage-id');
         if (stageId) {
           const guidsInStage: Set<string> = new Set();
-          const allAssignedGuids: Set<string> = new Set();
 
           elementToStageMap.forEach((value, key) => {
-            allAssignedGuids.add(key);
             if (value === stageId) {
               guidsInStage.add(key);
             }
           });
 
           if (guidsInStage.size > 0) {
-            // Hide all assigned objects first
-            allAssignedGuids.forEach(guid => {
-              window.StreamBIM.hideObject(guid).catch((err: any) => {
-                console.warn('Could not hide object:', guid, err);
-              });
+            // Hide all selected elements except those in this stage (including unassigned)
+            selectedElements.forEach((_, guid) => {
+              if (!guidsInStage.has(guid)) {
+                window.StreamBIM.hideObject(guid).catch((err: any) => {
+                  console.warn('Could not hide object:', guid, err);
+                });
+              }
             });
 
-            // Then show only the objects in this stage
+            // Show only the objects in this stage
             guidsInStage.forEach(guid => {
               window.StreamBIM.showObject(guid).catch((err: any) => {
                 console.warn('Could not show object:', guid, err);
