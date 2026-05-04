@@ -36,7 +36,9 @@
       "Bash(curl -s \"https://raw.githubusercontent.com/OliverNicholls/SBW_IFCChecker/master/.github/workflows/deploy.yml\")",
       "Bash(mkdir -p public/lib)",
       "Bash(cp node_modules/streambim-widget-api/dist/streambim-widget-api.min.js public/lib/)",
-      "Bash(curl -s \"https://lkab.com/wp-content/themes/bz-app-theme/assets/images/logotypes/LKAB_logo_white.svg\" -o LKAB_logo_white.svg)"
+      "Bash(curl -s \"https://lkab.com/wp-content/themes/bz-app-theme/assets/images/logotypes/LKAB_logo_white.svg\" -o LKAB_logo_white.svg)",
+      "Bash(git commit *)",
+      "Read(//c/Users/oliver.nicholls/OneDrive - Tikab Strukturmekanik AB/Dokument/Tikab/Entwicklung/0009_Egenskapshantering/src/**)"
     ],
     "additionalDirectories": [
       "c:\\c\\Users\\oliver.nicholls\\OneDrive - Tikab Strukturmekanik AB\\Dokument\\Tikab\\Utveckling\\0009_Egenskapshantering"

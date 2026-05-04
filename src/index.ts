@@ -440,7 +440,6 @@ function setupEventListeners() {
         const stageId = target.getAttribute('data-stage-id');
         if (stageId) {
           const guidsInStage: Set<string> = new Set();
-          const hidePromises: Promise<void>[] = [];
 
           elementToStageMap.forEach((value, key) => {
             if (value === stageId) {
@@ -449,25 +448,23 @@ function setupEventListeners() {
           });
 
           if (guidsInStage.size > 0) {
-            // Hide all selected elements except those in this stage (including unassigned)
-            selectedElements.forEach((_, guid) => {
-              if (!guidsInStage.has(guid)) {
-                hidePromises.push(
-                  window.StreamBIM.hideObject(guid).catch((err: any) => {
-                    console.warn('Could not hide object:', guid, err);
-                  })
-                );
-              }
-            });
-
-            // Wait for all hide operations to complete, then show stage objects
-            Promise.all(hidePromises).then(() => {
-              guidsInStage.forEach(guid => {
-                window.StreamBIM.showObject(guid).catch((err: any) => {
-                  console.warn('Could not show object:', guid, err);
-                });
+            // Show all objects first to reset visibility state
+            window.StreamBIM.showAllObjects().then(() => {
+              // Then hide all selected elements except those in this stage (including unassigned)
+              const hidePromises: Promise<void>[] = [];
+              selectedElements.forEach((_, guid) => {
+                if (!guidsInStage.has(guid)) {
+                  hidePromises.push(
+                    window.StreamBIM.hideObject(guid).catch((err: any) => {
+                      console.warn('Could not hide object:', guid, err);
+                    })
+                  );
+                }
               });
-              console.log(`Isolated ${guidsInStage.size} objects in stage ${stageId}`);
+
+              Promise.all(hidePromises).then(() => {
+                console.log(`Isolated ${guidsInStage.size} objects in stage ${stageId}`);
+              });
             });
           } else {
             console.log('No elements assigned to this stage');
