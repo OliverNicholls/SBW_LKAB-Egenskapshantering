@@ -552,7 +552,7 @@ window.StreamBIM.connect({
   }
 }).then(() => {
   renderUI();
-  updateColorCoding();
+  // Don't call updateColorCoding on launch - only on explicit button click
   console.log('StreamBIM connected');
 }).catch((error: any) => {
   console.error('Failed to connect to StreamBIM:', error);
