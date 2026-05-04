@@ -448,23 +448,22 @@ function setupEventListeners() {
           });
 
           if (guidsInStage.size > 0) {
-            // Show all objects first to reset visibility state
-            window.StreamBIM.showAllObjects().then(() => {
-              // Then hide all selected elements except those in this stage (including unassigned)
-              const hidePromises: Promise<void>[] = [];
-              selectedElements.forEach((_, guid) => {
-                if (!guidsInStage.has(guid)) {
-                  hidePromises.push(
+            // Get all objects in the model and hide everything except the stage
+            window.StreamBIM.findObjects({}).then((allGuids: string[]) => {
+              window.StreamBIM.showAllObjects().then(() => {
+                const hidePromises = allGuids
+                  .filter(guid => !guidsInStage.has(guid))
+                  .map(guid =>
                     window.StreamBIM.hideObject(guid).catch((err: any) => {
                       console.warn('Could not hide object:', guid, err);
                     })
                   );
-                }
+                Promise.all(hidePromises).then(() => {
+                  console.log(`Isolated ${guidsInStage.size} objects in stage ${stageId}`);
+                });
               });
-
-              Promise.all(hidePromises).then(() => {
-                console.log(`Isolated ${guidsInStage.size} objects in stage ${stageId}`);
-              });
+            }).catch((err: any) => {
+              console.warn('Could not fetch all objects:', err);
             });
           } else {
             console.log('No elements assigned to this stage');
