@@ -287,7 +287,6 @@ function renderDemolitionSequencingTab(): string {
                 </div>
               `}
               <button data-action="highlight-stage" data-stage-id="${stage.id}" style="padding: 12px 16px; background: #2196f3; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 13px; font-weight: 600; transition: background-color 0.2s; flex-shrink: 0;">Highlight</button>
-              <button data-action="isolate-stage" data-stage-id="${stage.id}" style="padding: 12px 16px; background: #9c27b0; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 13px; font-weight: 600; transition: background-color 0.2s; flex-shrink: 0;">Isolate</button>
             </div>
             `;
           })
@@ -432,40 +431,6 @@ function setupEventListeners() {
               });
             });
             console.log(`Highlighted ${guidsInStage.length} objects in stage ${stageId}`);
-          } else {
-            console.log('No elements assigned to this stage');
-          }
-        }
-      } else if (action === 'isolate-stage') {
-        const stageId = target.getAttribute('data-stage-id');
-        if (stageId) {
-          const guidsInStage: Set<string> = new Set();
-
-          elementToStageMap.forEach((value, key) => {
-            if (value === stageId) {
-              guidsInStage.add(key);
-            }
-          });
-
-          if (guidsInStage.size > 0) {
-            // Get all objects in the model and hide everything except the stage
-            window.StreamBIM.findObjects({}).then((allGuids: string[]) => {
-              console.log(`findObjects returned ${allGuids.length} total GUIDs`);
-              window.StreamBIM.showAllObjects().then(() => {
-                const guidsToHide = allGuids.filter(guid => !guidsInStage.has(guid));
-                console.log(`Will hide ${guidsToHide.length} objects, keeping ${guidsInStage.size}`);
-                const hidePromises = guidsToHide.map(guid =>
-                  window.StreamBIM.hideObject(guid).catch((err: any) => {
-                    console.warn('Could not hide object:', guid, err);
-                  })
-                );
-                Promise.all(hidePromises).then(() => {
-                  console.log(`Isolated ${guidsInStage.size} objects in stage ${stageId}`);
-                });
-              });
-            }).catch((err: any) => {
-              console.warn('Could not fetch all objects:', err);
-            });
           } else {
             console.log('No elements assigned to this stage');
           }
