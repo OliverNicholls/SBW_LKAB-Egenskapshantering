@@ -435,25 +435,30 @@ function setupEventListeners() {
         const stageId = target.getAttribute('data-stage-id');
         if (stageId) {
           const guidsInStage: Set<string> = new Set();
-          const guidsInOtherStages: Set<string> = new Set();
+          const allAssignedGuids: Set<string> = new Set();
 
           elementToStageMap.forEach((value, key) => {
+            allAssignedGuids.add(key);
             if (value === stageId) {
               guidsInStage.add(key);
-            } else {
-              guidsInOtherStages.add(key);
             }
           });
 
           if (guidsInStage.size > 0) {
-            // Hide objects in other stages
-            Array.from(guidsInOtherStages).forEach(guid => {
-              window.StreamBIM.hideObject(guid).catch((err: any) => {
-                console.warn('Could not hide object:', guid, err);
+            // First, show all objects to reset any previous isolation
+            window.StreamBIM.showAllObjects().catch((err: any) => {
+              console.warn('Could not show all objects:', err);
+            }).then(() => {
+              // Then hide all assigned objects that are NOT in this stage
+              allAssignedGuids.forEach(guid => {
+                if (!guidsInStage.has(guid)) {
+                  window.StreamBIM.hideObject(guid).catch((err: any) => {
+                    console.warn('Could not hide object:', guid, err);
+                  });
+                }
               });
+              console.log(`Isolated ${guidsInStage.size} objects in stage ${stageId}`);
             });
-
-            console.log(`Isolated ${guidsInStage.size} objects in stage ${stageId}, hid ${guidsInOtherStages.size} in other stages`);
           } else {
             console.log('No elements assigned to this stage');
           }
