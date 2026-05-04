@@ -57,9 +57,17 @@ function updateColorCoding() {
     }
   });
 
-  window.StreamBIM.colorCodeObjects(colorMap).catch((err: any) => {
-    console.warn('Could not apply color coding:', err);
-  });
+  console.log('Color map to apply:', colorMap);
+  console.log('StreamBIM API available:', !!window.StreamBIM);
+  console.log('colorCodeObjects method available:', !!window.StreamBIM?.colorCodeObjects);
+
+  window.StreamBIM.colorCodeObjects(colorMap)
+    .then(() => {
+      console.log('Color coding applied successfully');
+    })
+    .catch((err: any) => {
+      console.error('Failed to apply color coding:', err);
+    });
 }
 
 function renderHeader(): string {
