@@ -273,12 +273,13 @@ function renderDemolitionSequencingTab(): string {
       <div style="margin-bottom: 16px; padding: 12px; background: #f0f0f0; border-radius: 4px;">
         <h3 style="margin: 0; font-size: 14px; color: #333; font-weight: 600;">Selected Elements: ${selectedElements.size}</h3>
       </div>
-      ${elementToStageMap.size > 0 ? `
-        <div style="display: flex; gap: 8px; margin-top: 20px; padding-top: 20px; border-top: 1px solid #ddd;">
+      <div style="display: flex; gap: 8px; margin-top: 20px; padding-top: 20px; border-top: 1px solid #ddd;">
+        <button data-action="apply-colors" style="flex: 1; padding: 10px 16px; background: #ff9800; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 13px; font-weight: 600; transition: background-color 0.2s;">Color Code Elements</button>
+        ${elementToStageMap.size > 0 ? `
           <button data-action="export-revit" style="flex: 1; padding: 10px 16px; background: #1976d2; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 13px; font-weight: 600; transition: background-color 0.2s;">Export to Revit Format</button>
           <button data-action="export-config" style="flex: 1; padding: 10px 16px; background: #388e3c; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 13px; font-weight: 600; transition: background-color 0.2s;">Export Config</button>
-        </div>
-      ` : ''}
+        ` : ''}
+      </div>
     </div>
   `;
 }
@@ -387,6 +388,9 @@ function setupEventListeners() {
           updateColorCoding();
           renderUI();
         }
+      } else if (action === 'apply-colors') {
+        updateColorCoding();
+        alert('Colors applied to elements in the 3D view based on their demolition stage assignments.');
       } else if (action === 'export-revit') {
         console.log('Export to Revit format:', Array.from(elementToStageMap.entries()));
         const data = Array.from(elementToStageMap.entries()).map(([guid, stageId]) => {
