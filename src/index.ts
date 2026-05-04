@@ -450,20 +450,21 @@ function setupEventListeners() {
           });
 
           if (guidsInStage.size > 0) {
-            // First, show all objects to reset any previous isolation
-            window.StreamBIM.showAllObjects().catch((err: any) => {
-              console.warn('Could not show all objects:', err);
-            }).then(() => {
-              // Then hide all assigned objects that are NOT in this stage
-              allAssignedGuids.forEach(guid => {
-                if (!guidsInStage.has(guid)) {
-                  window.StreamBIM.hideObject(guid).catch((err: any) => {
-                    console.warn('Could not hide object:', guid, err);
-                  });
-                }
+            // Hide all assigned objects first
+            allAssignedGuids.forEach(guid => {
+              window.StreamBIM.hideObject(guid).catch((err: any) => {
+                console.warn('Could not hide object:', guid, err);
               });
-              console.log(`Isolated ${guidsInStage.size} objects in stage ${stageId}`);
             });
+
+            // Then show only the objects in this stage
+            guidsInStage.forEach(guid => {
+              window.StreamBIM.showObject(guid).catch((err: any) => {
+                console.warn('Could not show object:', guid, err);
+              });
+            });
+
+            console.log(`Isolated ${guidsInStage.size} objects in stage ${stageId}`);
           } else {
             console.log('No elements assigned to this stage');
           }
