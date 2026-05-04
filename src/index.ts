@@ -261,33 +261,38 @@ function renderDemolitionSequencingTab(): string {
     return '<div style="color: #999; padding: 40px 20px; text-align: center; flex: 1; display: flex; align-items: center; justify-content: center;">Create demolition stages first in the "Demolition Stages" tab</div>';
   }
 
-  if (selectedElements.size === 0) {
-    return '<div style="color: #999; padding: 40px 20px; text-align: center; flex: 1; display: flex; align-items: center; justify-content: center;">Select elements to assign them to demolition stages</div>';
-  }
-
   return `
     <div style="padding: 20px; overflow-y: auto; flex: 1;">
       <div style="margin-bottom: 16px;">
-        <h2 style="margin: 0 0 12px 0; font-size: 16px; color: #333; font-weight: 600;">Assign to Stage</h2>
-        <p style="margin: 0 0 12px 0; font-size: 13px; color: #666;">Click a stage button to assign all ${selectedElements.size} selected element${selectedElements.size !== 1 ? 's' : ''}</p>
+        <h2 style="margin: 0 0 12px 0; font-size: 16px; color: #333; font-weight: 600;">Demolition Stages</h2>
+        ${selectedElements.size > 0 ? `<p style="margin: 0 0 12px 0; font-size: 13px; color: #666;">Click a stage button to assign all ${selectedElements.size} selected element${selectedElements.size !== 1 ? 's' : ''}</p>` : `<p style="margin: 0 0 12px 0; font-size: 13px; color: #666;">Select elements to assign, or use Highlight to view each stage</p>`}
       </div>
       <div style="display: flex; flex-direction: column; gap: 8px; margin-bottom: 20px;">
         ${demolitionStages
           .sort((a, b) => a.order_index - b.order_index)
           .map((stage, index) => `
             <div style="display: flex; gap: 8px; align-items: center;">
-              <button data-action="assign-all-to-stage" data-stage-id="${stage.id}" style="flex: 1; padding: 12px 16px; background: ${stage.color}; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 13px; font-weight: 600; transition: background-color 0.2s; text-align: left; display: flex; align-items: center; gap: 12px;">
-                <span style="background: rgba(255,255,255,0.3); border-radius: 50%; width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 12px; font-weight: bold;">${index + 1}</span>
-                <span>${stage.name}</span>
-              </button>
+              ${selectedElements.size > 0 ? `
+                <button data-action="assign-all-to-stage" data-stage-id="${stage.id}" style="flex: 1; padding: 12px 16px; background: ${stage.color}; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 13px; font-weight: 600; transition: background-color 0.2s; text-align: left; display: flex; align-items: center; gap: 12px;">
+                  <span style="background: rgba(255,255,255,0.3); border-radius: 50%; width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 12px; font-weight: bold;">${index + 1}</span>
+                  <span>${stage.name}</span>
+                </button>
+              ` : `
+                <div style="flex: 1; padding: 12px 16px; background: ${stage.color}; color: white; border-radius: 4px; font-size: 13px; font-weight: 600; display: flex; align-items: center; gap: 12px;">
+                  <span style="background: rgba(255,255,255,0.3); border-radius: 50%; width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 12px; font-weight: bold;">${index + 1}</span>
+                  <span>${stage.name}</span>
+                </div>
+              `}
               <button data-action="highlight-stage" data-stage-id="${stage.id}" style="padding: 12px 16px; background: #2196f3; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 13px; font-weight: 600; transition: background-color 0.2s; flex-shrink: 0;">Highlight</button>
             </div>
           `)
           .join('')}
       </div>
-      <div style="margin-bottom: 16px; padding: 12px; background: #f0f0f0; border-radius: 4px;">
-        <h3 style="margin: 0; font-size: 14px; color: #333; font-weight: 600;">Selected Elements: ${selectedElements.size}</h3>
-      </div>
+      ${selectedElements.size > 0 ? `
+        <div style="margin-bottom: 16px; padding: 12px; background: #f0f0f0; border-radius: 4px;">
+          <h3 style="margin: 0; font-size: 14px; color: #333; font-weight: 600;">Selected Elements: ${selectedElements.size}</h3>
+        </div>
+      ` : ''}
       <div style="display: flex; gap: 8px; margin-top: 20px; padding-top: 20px; border-top: 1px solid #ddd;">
         <button data-action="apply-colors" style="flex: 1; padding: 10px 16px; background: #ff9800; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 13px; font-weight: 600; transition: background-color 0.2s;">Color Code Elements</button>
         ${elementToStageMap.size > 0 ? `
