@@ -354,7 +354,8 @@ function setupEventListeners() {
           console.warn('Could not clear highlights:', err);
         });
         saveDemolitionData();
-        updateColorCoding();
+        // Disabled: only call on explicit "Color Code Elements" button
+        // updateColorCoding();
         renderUI();
       } else if (action === 'toggle-pin-pset') {
         const pset = target.getAttribute('data-pset');
@@ -392,7 +393,8 @@ function setupEventListeners() {
             }
           });
           saveDemolitionData();
-          updateColorCoding();
+          // Disabled: only call on explicit "Color Code Elements" button
+        // updateColorCoding();
           renderUI();
         }
       } else if (action === 'apply-colors') {
@@ -418,7 +420,8 @@ function setupEventListeners() {
             elementToStageMap.set(guid, stageId);
           });
           saveDemolitionData();
-          updateColorCoding();
+          // Disabled: only call on explicit "Color Code Elements" button
+        // updateColorCoding();
           renderUI();
         }
       } else if (action === 'set-stage-color') {
@@ -429,7 +432,8 @@ function setupEventListeners() {
           if (stage) {
             stage.color = color;
             saveDemolitionData();
-            updateColorCoding();
+            // Disabled: only call on explicit "Color Code Elements" button
+        // updateColorCoding();
             renderUI();
           }
         }
@@ -500,7 +504,8 @@ function setupEventListeners() {
         if (stage) {
           stage.color = color;
           saveDemolitionData();
-          updateColorCoding();
+          // Disabled: only call on explicit "Color Code Elements" button
+        // updateColorCoding();
           renderUI();
         }
       }
