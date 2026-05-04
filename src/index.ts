@@ -450,14 +450,15 @@ function setupEventListeners() {
           if (guidsInStage.size > 0) {
             // Get all objects in the model and hide everything except the stage
             window.StreamBIM.findObjects({}).then((allGuids: string[]) => {
+              console.log(`findObjects returned ${allGuids.length} total GUIDs`);
               window.StreamBIM.showAllObjects().then(() => {
-                const hidePromises = allGuids
-                  .filter(guid => !guidsInStage.has(guid))
-                  .map(guid =>
-                    window.StreamBIM.hideObject(guid).catch((err: any) => {
-                      console.warn('Could not hide object:', guid, err);
-                    })
-                  );
+                const guidsToHide = allGuids.filter(guid => !guidsInStage.has(guid));
+                console.log(`Will hide ${guidsToHide.length} objects, keeping ${guidsInStage.size}`);
+                const hidePromises = guidsToHide.map(guid =>
+                  window.StreamBIM.hideObject(guid).catch((err: any) => {
+                    console.warn('Could not hide object:', guid, err);
+                  })
+                );
                 Promise.all(hidePromises).then(() => {
                   console.log(`Isolated ${guidsInStage.size} objects in stage ${stageId}`);
                 });
