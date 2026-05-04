@@ -58,15 +58,16 @@ function updateColorCoding() {
   });
 
   console.log('Color map to apply:', colorMap);
+  console.log('Calling colorCodeObjects()...');
 
   window.StreamBIM.colorCodeObjects(colorMap)
     .then((result: any) => {
-      console.log('Color coding applied successfully, result:', result);
-      console.log('Setting search visualization mode to colorCode...');
-      return (window.StreamBIM as any).setSearchVisualizationMode('colorCode');
+      console.log('colorCodeObjects result:', result);
+      console.log('Attempting resetObjectSearch to refresh...');
+      return window.StreamBIM.resetObjectSearch();
     })
-    .then((result: any) => {
-      console.log('Search visualization mode set, result:', result);
+    .then(() => {
+      console.log('Object search reset');
     })
     .catch((err: any) => {
       console.error('Failed:', err);
