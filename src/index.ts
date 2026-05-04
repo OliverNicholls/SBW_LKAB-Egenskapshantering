@@ -270,22 +270,27 @@ function renderDemolitionSequencingTab(): string {
       <div style="display: flex; flex-direction: column; gap: 8px; margin-bottom: 20px;">
         ${demolitionStages
           .sort((a, b) => a.order_index - b.order_index)
-          .map((stage, index) => `
+          .map((stage, index) => {
+            const elementsInStage = Array.from(elementToStageMap.values()).filter(v => v === stage.id).length;
+            const hasElements = elementsInStage > 0;
+            return `
             <div style="display: flex; gap: 8px; align-items: center;">
               ${selectedElements.size > 0 ? `
-                <button data-action="assign-all-to-stage" data-stage-id="${stage.id}" style="flex: 1; padding: 12px 16px; background: ${stage.color}; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 13px; font-weight: 600; transition: background-color 0.2s; text-align: left; display: flex; align-items: center; gap: 12px;">
+                <button data-action="assign-all-to-stage" data-stage-id="${stage.id}" class="${hasElements ? 'stage-assigned' : ''}" style="flex: 1; padding: 12px 16px; background: ${stage.color}; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 13px; font-weight: 600; transition: background-color 0.2s; text-align: left; display: flex; align-items: center; gap: 12px;">
                   <span style="background: rgba(255,255,255,0.3); border-radius: 50%; width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 12px; font-weight: bold;">${index + 1}</span>
-                  <span>${stage.name}</span>
+                  <span>${stage.name}${hasElements ? ` (${elementsInStage})` : ''}</span>
                 </button>
               ` : `
-                <div style="flex: 1; padding: 12px 16px; background: ${stage.color}; color: white; border-radius: 4px; font-size: 13px; font-weight: 600; display: flex; align-items: center; gap: 12px;">
+                <div class="${hasElements ? 'stage-assigned' : ''}" style="flex: 1; padding: 12px 16px; background: ${stage.color}; color: white; border-radius: 4px; font-size: 13px; font-weight: 600; display: flex; align-items: center; gap: 12px;">
                   <span style="background: rgba(255,255,255,0.3); border-radius: 50%; width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 12px; font-weight: bold;">${index + 1}</span>
-                  <span>${stage.name}</span>
+                  <span>${stage.name}${hasElements ? ` (${elementsInStage})` : ''}</span>
                 </div>
               `}
               <button data-action="highlight-stage" data-stage-id="${stage.id}" style="padding: 12px 16px; background: #2196f3; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 13px; font-weight: 600; transition: background-color 0.2s; flex-shrink: 0;">Highlight</button>
+              <button data-action="isolate-stage" data-stage-id="${stage.id}" style="padding: 12px 16px; background: #9c27b0; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 13px; font-weight: 600; transition: background-color 0.2s; flex-shrink: 0;">Isolate</button>
             </div>
-          `)
+            `;
+          })
           .join('')}
       </div>
       ${selectedElements.size > 0 ? `
@@ -330,6 +335,16 @@ function renderUI() {
   }
 
   app.innerHTML = `
+    <style>
+      @keyframes pulse {
+        0% { box-shadow: 0 0 0 0 rgba(255, 152, 0, 0.7); }
+        70% { box-shadow: 0 0 0 10px rgba(255, 152, 0, 0); }
+        100% { box-shadow: 0 0 0 0 rgba(255, 152, 0, 0); }
+      }
+      .stage-assigned {
+        animation: pulse 2s infinite;
+      }
+    </style>
     <div style="display: flex; flex-direction: column; height: 100vh; background: white;">
       ${renderHeader()}
       <div style="flex: 1; overflow-y: auto; display: flex; flex-direction: column;">
@@ -412,6 +427,37 @@ function setupEventListeners() {
               });
             });
             console.log(`Highlighted ${guidsInStage.length} objects in stage ${stageId}`);
+          } else {
+            console.log('No elements assigned to this stage');
+          }
+        }
+      } else if (action === 'isolate-stage') {
+        const stageId = target.getAttribute('data-stage-id');
+        if (stageId) {
+          const guidsInStage: Set<string> = new Set();
+          elementToStageMap.forEach((value, key) => {
+            if (value === stageId) {
+              guidsInStage.add(key);
+            }
+          });
+
+          if (guidsInStage.size > 0) {
+            const allGuids = new Set(elementToStageMap.keys());
+            const guidsToHide = Array.from(allGuids).filter(guid => !guidsInStage.has(guid));
+
+            guidsToHide.forEach(guid => {
+              window.StreamBIM.hideObject(guid).catch((err: any) => {
+                console.warn('Could not hide object:', guid, err);
+              });
+            });
+
+            Array.from(guidsInStage).forEach(guid => {
+              window.StreamBIM.showObject(guid).catch((err: any) => {
+                console.warn('Could not show object:', guid, err);
+              });
+            });
+
+            console.log(`Isolated ${guidsInStage.size} objects in stage ${stageId}, hid ${guidsToHide.length} others`);
           } else {
             console.log('No elements assigned to this stage');
           }
