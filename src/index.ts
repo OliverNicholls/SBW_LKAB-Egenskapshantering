@@ -276,12 +276,12 @@ function renderDemolitionSequencingTab(): string {
             return `
             <div style="display: flex; gap: 8px; align-items: center;">
               ${selectedElements.size > 0 ? `
-                <button data-action="assign-all-to-stage" data-stage-id="${stage.id}" class="${hasElements ? 'stage-assigned' : ''}" style="flex: 1; padding: 12px 16px; background: ${stage.color}; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 13px; font-weight: 600; transition: background-color 0.2s; text-align: left; display: flex; align-items: center; gap: 12px;">
+                <button data-action="assign-all-to-stage" data-stage-id="${stage.id}" style="flex: 1; padding: 12px 16px; background: ${stage.color}; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 13px; font-weight: 600; transition: background-color 0.2s; text-align: left; display: flex; align-items: center; gap: 12px;">
                   <span style="background: rgba(255,255,255,0.3); border-radius: 50%; width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 12px; font-weight: bold;">${index + 1}</span>
                   <span>${stage.name}${hasElements ? ` (${elementsInStage})` : ''}</span>
                 </button>
               ` : `
-                <div class="${hasElements ? 'stage-assigned' : ''}" style="flex: 1; padding: 12px 16px; background: ${stage.color}; color: white; border-radius: 4px; font-size: 13px; font-weight: 600; display: flex; align-items: center; gap: 12px;">
+                <div style="flex: 1; padding: 12px 16px; background: ${stage.color}; color: white; border-radius: 4px; font-size: 13px; font-weight: 600; display: flex; align-items: center; gap: 12px;">
                   <span style="background: rgba(255,255,255,0.3); border-radius: 50%; width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 12px; font-weight: bold;">${index + 1}</span>
                   <span>${stage.name}${hasElements ? ` (${elementsInStage})` : ''}</span>
                 </div>
@@ -345,8 +345,8 @@ function renderUI() {
         70% { box-shadow: 0 0 0 10px rgba(255, 152, 0, 0); }
         100% { box-shadow: 0 0 0 0 rgba(255, 152, 0, 0); }
       }
-      .stage-assigned {
-        animation: pulse 2s infinite;
+      .stage-assigned-pulse {
+        animation: pulse 0.6s ease-out;
       }
     </style>
     <div style="display: flex; flex-direction: column; height: 100vh; background: white;">
@@ -483,6 +483,8 @@ function setupEventListeners() {
             elementToStageMap.set(guid, stageId);
           });
           saveDemolitionData();
+          target.classList.add('stage-assigned-pulse');
+          setTimeout(() => target.classList.remove('stage-assigned-pulse'), 600);
           // Disabled: only call on explicit "Color Code Elements" button
         // updateColorCoding();
           renderUI();
