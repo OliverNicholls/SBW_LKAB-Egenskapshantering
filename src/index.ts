@@ -244,10 +244,11 @@ function renderDemolitionStagesTab(): string {
                   <div style="font-weight: 600; color: #333; font-size: 13px;">${stage.name}</div>
                   <div style="font-size: 11px; color: #999;">ID: ${stage.id}</div>
                 </div>
-                <div style="display: flex; align-items: center; gap: 8px; margin-right: 8px;">
+                <div style="display: flex; align-items: center; gap: 8px;">
                   <input type="color" data-action="set-stage-color" data-stage-id="${stage.id}" value="${stage.color}" style="width: 40px; height: 32px; border: 1px solid #ddd; border-radius: 3px; cursor: pointer; padding: 0; margin: 0;">
+                  <button data-action="highlight-stage" data-stage-id="${stage.id}" style="padding: 6px 12px; background: #2196f3; color: white; border: none; border-radius: 3px; cursor: pointer; font-size: 12px; font-weight: 600; transition: background-color 0.2s;">Highlight</button>
+                  <button data-action="remove-stage" data-stage-id="${stage.id}" style="padding: 6px 12px; background: #f44336; color: white; border: none; border-radius: 3px; cursor: pointer; font-size: 12px; font-weight: 600; transition: background-color 0.2s;">Remove</button>
                 </div>
-                <button data-action="remove-stage" data-stage-id="${stage.id}" style="padding: 6px 12px; background: #f44336; color: white; border: none; border-radius: 3px; cursor: pointer; font-size: 12px; font-weight: 600; transition: background-color 0.2s;">Remove</button>
               </div>
             `).join('')}
         </div>
@@ -387,6 +388,26 @@ function setupEventListeners() {
           demolitionStages.push(newStage);
           saveDemolitionData();
           renderUI();
+        }
+      } else if (action === 'highlight-stage') {
+        const stageId = target.getAttribute('data-stage-id');
+        if (stageId) {
+          const guidsInStage: string[] = [];
+          elementToStageMap.forEach((value, key) => {
+            if (value === stageId) {
+              guidsInStage.push(key);
+            }
+          });
+          if (guidsInStage.length > 0) {
+            guidsInStage.forEach(guid => {
+              window.StreamBIM.highlightObject(guid).catch((err: any) => {
+                console.warn('Could not highlight object:', guid, err);
+              });
+            });
+            console.log(`Highlighted ${guidsInStage.length} objects in stage ${stageId}`);
+          } else {
+            console.log('No elements assigned to this stage');
+          }
         }
       } else if (action === 'remove-stage') {
         const stageId = target.getAttribute('data-stage-id');
