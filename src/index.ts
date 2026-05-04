@@ -435,29 +435,32 @@ function setupEventListeners() {
         const stageId = target.getAttribute('data-stage-id');
         if (stageId) {
           const guidsInStage: Set<string> = new Set();
+          const guidsInOtherStages: Set<string> = new Set();
+
           elementToStageMap.forEach((value, key) => {
             if (value === stageId) {
               guidsInStage.add(key);
+            } else {
+              guidsInOtherStages.add(key);
             }
           });
 
           if (guidsInStage.size > 0) {
-            const allGuids = new Set(elementToStageMap.keys());
-            const guidsToHide = Array.from(allGuids).filter(guid => !guidsInStage.has(guid));
-
-            guidsToHide.forEach(guid => {
+            // Hide objects in other stages
+            Array.from(guidsInOtherStages).forEach(guid => {
               window.StreamBIM.hideObject(guid).catch((err: any) => {
                 console.warn('Could not hide object:', guid, err);
               });
             });
 
+            // Show objects in this stage
             Array.from(guidsInStage).forEach(guid => {
               window.StreamBIM.showObject(guid).catch((err: any) => {
                 console.warn('Could not show object:', guid, err);
               });
             });
 
-            console.log(`Isolated ${guidsInStage.size} objects in stage ${stageId}, hid ${guidsToHide.length} others`);
+            console.log(`Isolated ${guidsInStage.size} objects in stage ${stageId}, hid ${guidsInOtherStages.size} in other stages`);
           } else {
             console.log('No elements assigned to this stage');
           }
