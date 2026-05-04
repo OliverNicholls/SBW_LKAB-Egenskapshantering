@@ -244,11 +244,10 @@ function renderDemolitionStagesTab(): string {
                   <div style="font-weight: 600; color: #333; font-size: 13px;">${stage.name}</div>
                   <div style="font-size: 11px; color: #999;">ID: ${stage.id}</div>
                 </div>
-                <div style="display: flex; align-items: center; gap: 8px;">
+                <div style="display: flex; align-items: center; gap: 8px; margin-right: 8px;">
                   <input type="color" data-action="set-stage-color" data-stage-id="${stage.id}" value="${stage.color}" style="width: 40px; height: 32px; border: 1px solid #ddd; border-radius: 3px; cursor: pointer; padding: 0; margin: 0;">
-                  <button data-action="highlight-stage" data-stage-id="${stage.id}" style="padding: 6px 12px; background: #2196f3; color: white; border: none; border-radius: 3px; cursor: pointer; font-size: 12px; font-weight: 600; transition: background-color 0.2s;">Highlight</button>
-                  <button data-action="remove-stage" data-stage-id="${stage.id}" style="padding: 6px 12px; background: #f44336; color: white; border: none; border-radius: 3px; cursor: pointer; font-size: 12px; font-weight: 600; transition: background-color 0.2s;">Remove</button>
                 </div>
+                <button data-action="remove-stage" data-stage-id="${stage.id}" style="padding: 6px 12px; background: #f44336; color: white; border: none; border-radius: 3px; cursor: pointer; font-size: 12px; font-weight: 600; transition: background-color 0.2s;">Remove</button>
               </div>
             `).join('')}
         </div>
@@ -276,10 +275,13 @@ function renderDemolitionSequencingTab(): string {
         ${demolitionStages
           .sort((a, b) => a.order_index - b.order_index)
           .map((stage, index) => `
-            <button data-action="assign-all-to-stage" data-stage-id="${stage.id}" style="padding: 12px 16px; background: ${stage.color}; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 13px; font-weight: 600; transition: background-color 0.2s; text-align: left; display: flex; align-items: center; gap: 12px;">
-              <span style="background: rgba(255,255,255,0.3); border-radius: 50%; width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 12px; font-weight: bold;">${index + 1}</span>
-              <span>${stage.name}</span>
-            </button>
+            <div style="display: flex; gap: 8px; align-items: center;">
+              <button data-action="assign-all-to-stage" data-stage-id="${stage.id}" style="flex: 1; padding: 12px 16px; background: ${stage.color}; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 13px; font-weight: 600; transition: background-color 0.2s; text-align: left; display: flex; align-items: center; gap: 12px;">
+                <span style="background: rgba(255,255,255,0.3); border-radius: 50%; width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 12px; font-weight: bold;">${index + 1}</span>
+                <span>${stage.name}</span>
+              </button>
+              <button data-action="highlight-stage" data-stage-id="${stage.id}" style="padding: 12px 16px; background: #2196f3; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 13px; font-weight: 600; transition: background-color 0.2s; flex-shrink: 0;">Highlight</button>
+            </div>
           `)
           .join('')}
       </div>
