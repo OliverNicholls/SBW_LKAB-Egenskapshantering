@@ -453,13 +453,6 @@ function setupEventListeners() {
               });
             });
 
-            // Show objects in this stage
-            Array.from(guidsInStage).forEach(guid => {
-              window.StreamBIM.showObject(guid).catch((err: any) => {
-                console.warn('Could not show object:', guid, err);
-              });
-            });
-
             console.log(`Isolated ${guidsInStage.size} objects in stage ${stageId}, hid ${guidsInOtherStages.size} in other stages`);
           } else {
             console.log('No elements assigned to this stage');
