@@ -50,31 +50,19 @@ function hexToRgba(hex: string, alpha: number): string {
 
 function updateColorCoding() {
   const colorMap: Record<string, string> = {};
-  const legends: Record<string, string> = {};
-
   elementToStageMap.forEach((stageId, guid) => {
     const stage = demolitionStages.find(s => s.id === stageId);
     if (stage) {
       colorMap[guid] = stage.color;
-      if (!legends[stage.name]) {
-        legends[stage.name] = stage.color;
-      }
     }
   });
 
   console.log('Color map to apply:', colorMap);
-  console.log('Legends:', legends);
-  console.log('StreamBIM API available:', !!window.StreamBIM);
-  console.log('colorCodeObjectsWithLegends method available:', !!window.StreamBIM?.colorCodeObjectsWithLegends);
+  console.log('Available StreamBIM methods:', Object.getOwnPropertyNames(window.StreamBIM).filter(m => m.includes('color') || m.includes('Color')));
 
-  if (Object.keys(colorMap).length === 0) {
-    console.log('No elements to color code');
-    return;
-  }
-
-  window.StreamBIM.colorCodeObjectsWithLegends({ data: colorMap, legends })
+  window.StreamBIM.colorCodeObjects(colorMap)
     .then(() => {
-      console.log('Color coding with legends applied successfully');
+      console.log('Color coding applied successfully');
     })
     .catch((err: any) => {
       console.error('Failed to apply color coding:', err);
