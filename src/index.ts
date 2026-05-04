@@ -41,6 +41,27 @@ function formatValue(value: any, unit?: string): string {
   return String(value) + (unit ? ' ' + unit : '');
 }
 
+function hexToRgba(hex: string, alpha: number): string {
+  const r = parseInt(hex.slice(1, 3), 16);
+  const g = parseInt(hex.slice(3, 5), 16);
+  const b = parseInt(hex.slice(5, 7), 16);
+  return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+}
+
+function updateColorCoding() {
+  const colorMap: Record<string, string> = {};
+  elementToStageMap.forEach((stageId, guid) => {
+    const stage = demolitionStages.find(s => s.id === stageId);
+    if (stage) {
+      colorMap[guid] = stage.color;
+    }
+  });
+
+  window.StreamBIM.colorCodeObjects(colorMap).catch((err: any) => {
+    console.warn('Could not apply color coding:', err);
+  });
+}
+
 function renderHeader(): string {
   return `
     <div style="padding: 20px; background: #f5f5f5; border-bottom: 1px solid #ddd; display: flex; justify-content: space-between; align-items: center;">
@@ -70,7 +91,7 @@ function renderElementProperties(objInfo: any, guid: string): string {
 
   if (assignedStage) {
     html += `
-      <div style="margin-bottom: 12px; padding: 10px 12px; border-radius: 4px; border-left: 4px solid ${assignedStage.color}; background: ${assignedStage.color}20;">
+      <div style="margin-bottom: 12px; padding: 10px 12px; border-radius: 4px; border-left: 4px solid ${assignedStage.color}; background: ${hexToRgba(assignedStage.color, 0.15)};">
         <div style="font-size: 11px; color: #666; margin-bottom: 4px;">DEMOLITION STAGE</div>
         <div style="font-weight: 600; color: ${assignedStage.color}; font-size: 13px; display: flex; align-items: center; gap: 8px;">
           <span style="display: inline-block; width: 12px; height: 12px; border-radius: 2px; background: ${assignedStage.color};"></span>
@@ -325,6 +346,7 @@ function setupEventListeners() {
           console.warn('Could not clear highlights:', err);
         });
         saveDemolitionData();
+        updateColorCoding();
         renderUI();
       } else if (action === 'toggle-pin-pset') {
         const pset = target.getAttribute('data-pset');
@@ -362,6 +384,7 @@ function setupEventListeners() {
             }
           });
           saveDemolitionData();
+          updateColorCoding();
           renderUI();
         }
       } else if (action === 'export-revit') {
@@ -385,6 +408,7 @@ function setupEventListeners() {
             elementToStageMap.set(guid, stageId);
           });
           saveDemolitionData();
+          updateColorCoding();
           renderUI();
         }
       } else if (action === 'set-stage-color') {
@@ -395,6 +419,7 @@ function setupEventListeners() {
           if (stage) {
             stage.color = color;
             saveDemolitionData();
+            updateColorCoding();
             renderUI();
           }
         }
@@ -465,6 +490,7 @@ function setupEventListeners() {
         if (stage) {
           stage.color = color;
           saveDemolitionData();
+          updateColorCoding();
           renderUI();
         }
       }
@@ -506,6 +532,7 @@ window.StreamBIM.connect({
   }
 }).then(() => {
   renderUI();
+  updateColorCoding();
   console.log('StreamBIM connected');
 }).catch((error: any) => {
   console.error('Failed to connect to StreamBIM:', error);

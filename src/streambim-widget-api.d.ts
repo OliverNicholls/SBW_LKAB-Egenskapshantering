@@ -31,6 +31,11 @@ export interface StreamBIMAPI {
   takeScreenshot(): Promise<string>;
   setShowExpandButton(show: boolean): Promise<void>;
   setExpanded(expanded: boolean): Promise<void>;
+  colorCodeObjects(map: Record<string, string>): Promise<boolean>;
+  colorCodeObjectsWithLegends(data: { data: Record<string, string>; legends: Record<string, string> }): Promise<boolean>;
+  colorCodeByProperty(config: { pset?: string; propertyKey?: string }): Promise<boolean>;
+  colorCodeSpaces(map: Record<string, string>): Promise<boolean>;
+  colorCodeSpacesWithLegends(data: { data: Record<string, string>; legends?: Record<string, string> }): Promise<boolean>;
 }
 
 declare global {
