@@ -58,19 +58,18 @@ function updateColorCoding() {
   });
 
   console.log('Color map to apply:', colorMap);
-  console.log('All StreamBIM methods:', Object.getOwnPropertyNames(window.StreamBIM).sort());
 
   window.StreamBIM.colorCodeObjects(colorMap)
     .then((result: any) => {
       console.log('Color coding applied successfully, result:', result);
-      console.log('Attempting to get viewport state...');
-      return window.StreamBIM.getViewportState();
+      console.log('Setting search visualization mode to colorCode...');
+      return (window.StreamBIM as any).setSearchVisualizationMode('colorCode');
     })
-    .then((viewportState: any) => {
-      console.log('Current viewport state:', viewportState);
+    .then((result: any) => {
+      console.log('Search visualization mode set, result:', result);
     })
     .catch((err: any) => {
-      console.error('Failed to apply color coding:', err);
+      console.error('Failed:', err);
     });
 }
 
