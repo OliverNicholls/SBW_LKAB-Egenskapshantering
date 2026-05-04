@@ -398,7 +398,6 @@ function setupEventListeners() {
         }
       } else if (action === 'apply-colors') {
         updateColorCoding();
-        alert('Colors applied to elements in the 3D view based on their demolition stage assignments.');
       } else if (action === 'export-revit') {
         console.log('Export to Revit format:', Array.from(elementToStageMap.entries()));
         const data = Array.from(elementToStageMap.entries()).map(([guid, stageId]) => {
