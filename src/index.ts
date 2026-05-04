@@ -298,11 +298,16 @@ function renderDemolitionSequencingTab(): string {
           <h3 style="margin: 0; font-size: 14px; color: #333; font-weight: 600;">Selected Elements: ${selectedElements.size}</h3>
         </div>
       ` : ''}
-      <div style="display: flex; gap: 8px; margin-top: 20px; padding-top: 20px; border-top: 1px solid #ddd;">
-        <button data-action="apply-colors" style="flex: 1; padding: 10px 16px; background: #ff9800; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 13px; font-weight: 600; transition: background-color 0.2s;">Color Code Elements</button>
+      <div style="display: flex; flex-direction: column; gap: 8px; margin-top: 20px; padding-top: 20px; border-top: 1px solid #ddd;">
+        <div style="display: flex; gap: 8px;">
+          <button data-action="apply-colors" style="flex: 1; padding: 10px 16px; background: #ff9800; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 13px; font-weight: 600; transition: background-color 0.2s;">Color Code Elements</button>
+          <button data-action="clear-all-isolation" style="flex: 1; padding: 10px 16px; background: #757575; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 13px; font-weight: 600; transition: background-color 0.2s;">Clear Selection & Isolation</button>
+        </div>
         ${elementToStageMap.size > 0 ? `
-          <button data-action="export-revit" style="flex: 1; padding: 10px 16px; background: #1976d2; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 13px; font-weight: 600; transition: background-color 0.2s;">Export to Revit Format</button>
-          <button data-action="export-config" style="flex: 1; padding: 10px 16px; background: #388e3c; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 13px; font-weight: 600; transition: background-color 0.2s;">Export Config</button>
+          <div style="display: flex; gap: 8px;">
+            <button data-action="export-revit" style="flex: 1; padding: 10px 16px; background: #1976d2; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 13px; font-weight: 600; transition: background-color 0.2s;">Export to Revit Format</button>
+            <button data-action="export-config" style="flex: 1; padding: 10px 16px; background: #388e3c; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 13px; font-weight: 600; transition: background-color 0.2s;">Export Config</button>
+          </div>
         ` : ''}
       </div>
     </div>
@@ -479,6 +484,17 @@ function setupEventListeners() {
         }
       } else if (action === 'apply-colors') {
         updateColorCoding();
+      } else if (action === 'clear-all-isolation') {
+        selectedElements.clear();
+        selectedObjectInfoMap.clear();
+        window.StreamBIM.showAllObjects().catch((err: any) => {
+          console.warn('Could not show all objects:', err);
+        });
+        window.StreamBIM.deHighlightAllObjects().catch((err: any) => {
+          console.warn('Could not clear highlights:', err);
+        });
+        console.log('Cleared selection and isolation');
+        renderUI();
       } else if (action === 'export-revit') {
         console.log('Export to Revit format:', Array.from(elementToStageMap.entries()));
         const data = Array.from(elementToStageMap.entries()).map(([guid, stageId]) => {
