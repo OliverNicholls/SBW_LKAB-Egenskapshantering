@@ -101,36 +101,10 @@ function renderElementProperties(objInfo: any, guid: string): string {
   const assignedStageId = elementToStageMap.get(guid);
   const assignedStage = demolitionStages.find(s => s.id === assignedStageId);
 
-  let groupIndex = 0;
-  const customDataGroupId = `custom-data-${guid}`;
-  const customDataExpanded = expandedGroups.has(customDataGroupId);
-
-  // Add Custom Data (Demolition Status) as a collapsible group
-  html += `
-    <div style="margin-bottom: 12px;">
-      <div style="display: flex; gap: 8px; align-items: center;">
-        <button data-group-id="${customDataGroupId}" style="flex: 1; padding: 10px 12px; background: #e3f2fd; border: 1px solid #0066cc; border-left: 4px solid #0066cc; border-radius: 2px; cursor: pointer; text-align: left; font-size: 13px; color: #0066cc; font-weight: 600; display: flex; justify-content: space-between; align-items: center; transition: all 0.2s;">
-          <span>Custom Data (1)</span>
-          <span style="transform: rotate(${customDataExpanded ? '180deg' : '0deg'}); transition: transform 0.2s; display: inline-block;">▼</span>
-        </button>
-      </div>
-      ${customDataExpanded ? `
-        <div style="padding: 8px; border-left: 2px solid #e0e0e0; margin-top: 4px;">
-          <div style="margin-bottom: 8px; padding: 6px 8px; background: #fafafa; border-radius: 3px; font-size: 12px;">
-            <div style="margin-bottom: 2px;">
-              <strong style="color: #333;">Demolition Status:</strong>
-              <span style="color: #0066cc; font-family: monospace;">${assignedStage ? assignedStage.name : 'Not Assigned'}</span>
-            </div>
-          </div>
-        </div>
-      ` : ''}
-    </div>
-  `;
-
   if (assignedStage) {
     html += `
       <div style="margin-bottom: 12px; padding: 10px 12px; border-radius: 4px; border-left: 4px solid ${assignedStage.color}; background: ${hexToRgba(assignedStage.color, 0.15)};">
-        <div style="font-size: 11px; color: #666; margin-bottom: 4px;">DEMOLITION STAGE</div>
+        <div style="font-size: 11px; color: #666; margin-bottom: 4px;">DEMOLITION STATUS</div>
         <div style="font-weight: 600; color: ${assignedStage.color}; font-size: 13px; display: flex; align-items: center; gap: 8px;">
           <span style="display: inline-block; width: 12px; height: 12px; border-radius: 2px; background: ${assignedStage.color};"></span>
           ${assignedStage.name}
@@ -138,6 +112,8 @@ function renderElementProperties(objInfo: any, guid: string): string {
       </div>
     `;
   }
+
+  let groupIndex = 0;
 
   if (Array.isArray(objInfo.groups)) {
     const sortedGroups = [...objInfo.groups].sort((a: any, b: any) => {
