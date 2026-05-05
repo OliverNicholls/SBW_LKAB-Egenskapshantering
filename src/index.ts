@@ -62,6 +62,8 @@ function hexToRgba(hex: string, alpha: number): string {
 
 function updateColorCoding() {
   const colorMap: Record<string, string> = {};
+  const legends: Record<string, string> = {};
+
   elementToStageMap.forEach((stageId, guid) => {
     const stage = demolitionStages.find(s => s.id === stageId);
     if (stage) {
@@ -69,20 +71,20 @@ function updateColorCoding() {
     }
   });
 
-  console.log('Color map to apply:', colorMap);
-  console.log('Calling colorCodeObjects()...');
+  demolitionStages.forEach((stage) => {
+    legends[stage.name] = stage.color;
+  });
 
-  window.StreamBIM.colorCodeObjects(colorMap)
+  console.log('Color map to apply:', colorMap);
+  console.log('Legends:', legends);
+  console.log('Calling colorCodeObjectsWithLegends()...');
+
+  window.StreamBIM.colorCodeObjectsWithLegends({ data: colorMap, legends })
     .then((result: any) => {
-      console.log('colorCodeObjects result:', result);
-      console.log('Attempting resetObjectSearch to refresh...');
-      return window.StreamBIM.resetObjectSearch();
-    })
-    .then(() => {
-      console.log('Object search reset');
+      console.log('colorCodeObjectsWithLegends result:', result);
     })
     .catch((err: any) => {
-      console.error('Failed:', err);
+      console.error('Failed to apply color coding:', err);
     });
 }
 
@@ -332,6 +334,11 @@ function renderDemolitionSequencingTab(): string {
           })
           .join('')}
       </div>
+      ${elementToStageMap.size > 0 ? `
+        <div style="margin-bottom: 20px;">
+          <button data-action="apply-colors" style="width: 100%; padding: 12px 16px; background: #6b7280; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 13px; font-weight: 600; transition: background-color 0.2s;">Color Code Elements</button>
+        </div>
+      ` : ''}
       ${selectedElements.size > 0 ? `
         <div style="margin-bottom: 16px; padding: 12px; background: #f0f0f0; border-radius: 4px;">
           <h3 style="margin: 0; font-size: 14px; color: #333; font-weight: 600;">Selected Elements: ${selectedElements.size}</h3>
