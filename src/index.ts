@@ -77,7 +77,7 @@ function updateColorCoding() {
   let coloringPromise: Promise<any> = Promise.resolve();
 
   demolitionStages.forEach((stage) => {
-    coloringPromise = coloringPromise.then(() => {
+    coloringPromise = coloringPromise.then((): Promise<any> => {
       const guidsInStage: string[] = [];
       elementToStageMap.forEach((stageId, guid) => {
         if (stageId === stage.id) {
@@ -85,7 +85,7 @@ function updateColorCoding() {
         }
       });
 
-      if (guidsInStage.length === 0) return Promise.resolve();
+      if (guidsInStage.length === 0) return Promise.resolve() as Promise<any>;
 
       const colorName = hexToColorName[stage.color] || stage.color.replace('#', '');
       const colorMap: Record<string, string> = {};
@@ -94,7 +94,7 @@ function updateColorCoding() {
       });
 
       console.log(`Applying ${colorName} to ${guidsInStage.length} elements in stage ${stage.name}`);
-      return window.StreamBIM.colorCodeObjects(colorMap);
+      return window.StreamBIM.colorCodeObjects(colorMap) as Promise<any>;
     });
   });
 
