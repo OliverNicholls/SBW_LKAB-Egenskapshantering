@@ -74,7 +74,7 @@ function updateColorCoding() {
 
   console.log('Applying color coding per stage...');
 
-  let coloringPromise = Promise.resolve();
+  let coloringPromise: Promise<any> = Promise.resolve();
 
   demolitionStages.forEach((stage) => {
     coloringPromise = coloringPromise.then(() => {
