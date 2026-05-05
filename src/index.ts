@@ -300,6 +300,9 @@ function renderDemolitionSequencingTab(): string {
 
   return `
     <div style="padding: 20px; overflow-y: auto; flex: 1;">
+      <div style="display: flex; gap: 8px; margin-bottom: 20px;">
+        <button data-action="clear-all-isolation" style="flex: 1; padding: 10px 16px; background: #9ca3af; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 13px; font-weight: 600; transition: background-color 0.2s;">Clear Selection</button>
+      </div>
       <div style="margin-bottom: 16px;">
         <h2 style="margin: 0 0 12px 0; font-size: 16px; color: #333; font-weight: 600;">Demolition Stages</h2>
         ${selectedElements.size > 0 ? `<p style="margin: 0 0 12px 0; font-size: 13px; color: #666;">Click a stage button to assign all ${selectedElements.size} selected element${selectedElements.size !== 1 ? 's' : ''}</p>` : `<p style="margin: 0 0 12px 0; font-size: 13px; color: #666;">Select elements to assign, or use Highlight to view each stage</p>`}
@@ -335,10 +338,6 @@ function renderDemolitionSequencingTab(): string {
         </div>
       ` : ''}
       <div style="display: flex; flex-direction: column; gap: 8px; margin-top: 20px; padding-top: 20px; border-top: 1px solid #ddd;">
-        <div style="display: flex; gap: 8px;">
-          <button data-action="apply-colors" style="flex: 1; padding: 10px 16px; background: #9ca3af; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 13px; font-weight: 600; transition: background-color 0.2s;">Color Code Elements</button>
-          <button data-action="clear-all-isolation" style="flex: 1; padding: 10px 16px; background: #9ca3af; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 13px; font-weight: 600; transition: background-color 0.2s;">Clear Selection & Isolation</button>
-        </div>
         ${elementToStageMap.size > 0 ? `
           <div style="display: flex; gap: 8px;">
             <button data-action="export-revit" style="flex: 1; padding: 10px 16px; background: #6b7280; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 13px; font-weight: 600; transition: background-color 0.2s;">Export to Revit Format</button>
