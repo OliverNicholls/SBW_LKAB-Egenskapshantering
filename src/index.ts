@@ -101,19 +101,38 @@ function renderElementProperties(objInfo: any, guid: string): string {
   const assignedStageId = elementToStageMap.get(guid);
   const assignedStage = demolitionStages.find(s => s.id === assignedStageId);
 
-  if (assignedStage) {
-    html += `
-      <div style="margin-bottom: 12px; padding: 10px 12px; border-radius: 4px; border-left: 4px solid ${assignedStage.color}; background: ${hexToRgba(assignedStage.color, 0.15)};">
-        <div style="font-size: 11px; color: #666; margin-bottom: 4px;">DEMOLITION STATUS</div>
-        <div style="font-weight: 600; color: ${assignedStage.color}; font-size: 13px; display: flex; align-items: center; gap: 8px;">
-          <span style="display: inline-block; width: 12px; height: 12px; border-radius: 2px; background: ${assignedStage.color};"></span>
-          ${assignedStage.name}
-        </div>
-      </div>
-    `;
-  }
-
   let groupIndex = 0;
+  const customDataGroupId = `custom-data-${guid}`;
+  const customDataExpanded = expandedGroups.has(customDataGroupId);
+  const customDataPinned = pinnedPsets.has('Custom Data');
+
+  // Add Custom Data pset with demolition status
+  const customDataBgColor = assignedStage ? assignedStage.color : '#666';
+  const customDataBgLight = assignedStage ? hexToRgba(assignedStage.color, 0.15) : '#f0f0f0';
+
+  html += `
+    <div style="margin-bottom: 12px;">
+      <div style="display: flex; gap: 8px; align-items: center;">
+        <button data-group-id="${customDataGroupId}" style="flex: 1; padding: 10px 12px; background: ${customDataBgLight}; border: 1px solid ${customDataBgColor}; border-left: 4px solid ${customDataBgColor}; border-radius: 2px; cursor: pointer; text-align: left; font-size: 13px; color: ${customDataBgColor}; font-weight: 600; display: flex; justify-content: space-between; align-items: center; transition: all 0.2s;">
+          <span>Custom Data (1)</span>
+          <span style="transform: rotate(${customDataExpanded ? '180deg' : '0deg'}); transition: transform 0.2s; display: inline-block;">▼</span>
+        </button>
+        <button data-action="toggle-pin-pset" data-pset="Custom Data" style="padding: 8px 10px; background: ${customDataPinned ? customDataBgColor : '#f0f0f0'}; color: ${customDataPinned ? 'white' : '#666'}; border: 1px solid ${customDataPinned ? customDataBgColor : '#ddd'}; border-radius: 4px; cursor: pointer; font-size: 14px; font-weight: bold; min-width: 40px; text-align: center; transition: all 0.2s;" title="${customDataPinned ? 'Unpin this property set' : 'Pin this property set'}">
+          ${customDataPinned ? '📌' : '📍'}
+        </button>
+      </div>
+      ${customDataExpanded ? `
+        <div style="padding: 8px; border-left: 2px solid #e0e0e0; margin-top: 4px;">
+          <div style="margin-bottom: 8px; padding: 6px 8px; background: ${customDataBgLight}; border-radius: 3px; font-size: 12px; border-left: 3px solid ${customDataBgColor};">
+            <div style="margin-bottom: 2px;">
+              <strong style="color: #333;">Demolition Status:</strong>
+              <span style="color: ${customDataBgColor}; font-family: monospace; font-weight: 600;">${assignedStage ? assignedStage.name : 'Not Assigned'}</span>
+            </div>
+          </div>
+        </div>
+      ` : ''}
+    </div>
+  `;
 
   if (Array.isArray(objInfo.groups)) {
     const sortedGroups = [...objInfo.groups].sort((a: any, b: any) => {
