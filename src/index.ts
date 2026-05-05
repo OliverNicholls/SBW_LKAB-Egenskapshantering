@@ -318,13 +318,13 @@ function renderDemolitionSequencingTab(): string {
       ` : ''}
       <div style="display: flex; flex-direction: column; gap: 8px; margin-top: 20px; padding-top: 20px; border-top: 1px solid #ddd;">
         <div style="display: flex; gap: 8px;">
-          <button data-action="apply-colors" style="flex: 1; padding: 10px 16px; background: #ff9800; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 13px; font-weight: 600; transition: background-color 0.2s;">Color Code Elements</button>
-          <button data-action="clear-all-isolation" style="flex: 1; padding: 10px 16px; background: #757575; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 13px; font-weight: 600; transition: background-color 0.2s;">Clear Selection & Isolation</button>
+          <button data-action="apply-colors" style="flex: 1; padding: 10px 16px; background: #9ca3af; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 13px; font-weight: 600; transition: background-color 0.2s;">Color Code Elements</button>
+          <button data-action="clear-all-isolation" style="flex: 1; padding: 10px 16px; background: #9ca3af; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 13px; font-weight: 600; transition: background-color 0.2s;">Clear Selection & Isolation</button>
         </div>
         ${elementToStageMap.size > 0 ? `
           <div style="display: flex; gap: 8px;">
-            <button data-action="export-revit" style="flex: 1; padding: 10px 16px; background: #1976d2; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 13px; font-weight: 600; transition: background-color 0.2s;">Export to Revit Format</button>
-            <button data-action="export-config" style="flex: 1; padding: 10px 16px; background: #388e3c; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 13px; font-weight: 600; transition: background-color 0.2s;">Export Config</button>
+            <button data-action="export-revit" style="flex: 1; padding: 10px 16px; background: #6b7280; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 13px; font-weight: 600; transition: background-color 0.2s;">Export to Revit Format</button>
+            <button data-action="export-config" style="flex: 1; padding: 10px 16px; background: #6b7280; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 13px; font-weight: 600; transition: background-color 0.2s;">Export Config</button>
           </div>
         ` : ''}
       </div>
@@ -482,12 +482,27 @@ function setupEventListeners() {
         console.log('Cleared selection and isolation');
         renderUI();
       } else if (action === 'export-revit') {
-        console.log('Export to Revit format:', Array.from(elementToStageMap.entries()));
         const data = Array.from(elementToStageMap.entries()).map(([guid, stageId]) => {
           const stage = demolitionStages.find(s => s.id === stageId);
-          return { guid, stage: stage?.name || 'Unknown' };
+          return { globalid: guid, demolition_stage: stage?.name || 'Unknown', stage_order: stage?.order_index || '' };
         });
-        alert('Export to Revit format - Coming soon!\n\nAssignments: ' + JSON.stringify(data, null, 2));
+
+        const csvContent = [
+          ['globalid', 'demolition_stage', 'stage_order'],
+          ...data.map(row => [row.globalid, row.demolition_stage, row.stage_order])
+        ]
+          .map(row => row.map(cell => `"${cell}"`).join(','))
+          .join('\n');
+
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        const link = document.createElement('a');
+        const url = URL.createObjectURL(blob);
+        link.setAttribute('href', url);
+        link.setAttribute('download', `revit-demolition-stages-${new Date().toISOString().split('T')[0]}.csv`);
+        link.style.visibility = 'hidden';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
       } else if (action === 'export-config') {
         console.log('Export config:', { demolitionStages, elementToStageMap: Array.from(elementToStageMap.entries()) });
         const config = {
