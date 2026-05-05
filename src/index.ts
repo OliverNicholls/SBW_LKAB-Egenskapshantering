@@ -72,25 +72,35 @@ function updateColorCoding() {
     '#e91e63': 'pink'
   };
 
-  const colorMap: Record<string, string> = {};
+  console.log('Applying color coding per stage...');
 
-  elementToStageMap.forEach((stageId, guid) => {
-    const stage = demolitionStages.find(s => s.id === stageId);
-    if (stage) {
-      colorMap[guid] = hexToColorName[stage.color] || stage.color.replace('#', '');
-    }
+  let coloringPromise = Promise.resolve();
+
+  demolitionStages.forEach((stage) => {
+    coloringPromise = coloringPromise.then(() => {
+      const guidsInStage: string[] = [];
+      elementToStageMap.forEach((stageId, guid) => {
+        if (stageId === stage.id) {
+          guidsInStage.push(guid);
+        }
+      });
+
+      if (guidsInStage.length === 0) return Promise.resolve();
+
+      const colorName = hexToColorName[stage.color] || stage.color.replace('#', '');
+      const colorMap: Record<string, string> = {};
+      guidsInStage.forEach(guid => {
+        colorMap[guid] = colorName;
+      });
+
+      console.log(`Applying ${colorName} to ${guidsInStage.length} elements in stage ${stage.name}`);
+      return window.StreamBIM.colorCodeObjects(colorMap);
+    });
   });
 
-  console.log('Color map to apply:', colorMap);
-  console.log('Calling resetObjectSearch() then colorCodeObjects()...');
-
-  window.StreamBIM.resetObjectSearch()
+  coloringPromise
     .then(() => {
-      console.log('Search reset, applying color coding...');
-      return window.StreamBIM.colorCodeObjects(colorMap);
-    })
-    .then((result: any) => {
-      console.log('colorCodeObjects result:', result);
+      console.log('All stages colored');
     })
     .catch((err: any) => {
       console.error('Failed to apply color coding:', err);
