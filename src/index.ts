@@ -61,21 +61,11 @@ function hexToRgba(hex: string, alpha: number): string {
 }
 
 function updateColorCoding() {
-  const colorMap: Record<string, string> = {};
+  console.log('Calling colorCodeByProperty()...');
 
-  elementToStageMap.forEach((stageId, guid) => {
-    const stage = demolitionStages.find(s => s.id === stageId);
-    if (stage) {
-      colorMap[guid] = stage.color.replace('#', '');
-    }
-  });
-
-  console.log('Color map to apply:', colorMap);
-  console.log('Calling colorCodeObjects()...');
-
-  window.StreamBIM.colorCodeObjects(colorMap)
+  window.StreamBIM.colorCodeByProperty({ pset: 'Demolition', propertyKey: 'Stage' })
     .then((result: any) => {
-      console.log('colorCodeObjects result:', result);
+      console.log('colorCodeByProperty result:', result);
     })
     .catch((err: any) => {
       console.error('Failed to apply color coding:', err);
