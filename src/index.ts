@@ -71,9 +71,13 @@ function updateColorCoding() {
   });
 
   console.log('Color map to apply:', colorMap);
-  console.log('Calling colorCodeObjects()...');
+  console.log('Calling resetObjectSearch() then colorCodeObjects()...');
 
-  window.StreamBIM.colorCodeObjects(colorMap)
+  window.StreamBIM.resetObjectSearch()
+    .then(() => {
+      console.log('Search reset, applying color coding...');
+      return window.StreamBIM.colorCodeObjects(colorMap);
+    })
     .then((result: any) => {
       console.log('colorCodeObjects result:', result);
     })
