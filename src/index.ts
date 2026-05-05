@@ -61,12 +61,23 @@ function hexToRgba(hex: string, alpha: number): string {
 }
 
 function updateColorCoding() {
+  const hexToColorName: Record<string, string> = {
+    '#0066cc': 'blue',
+    '#d32f2f': 'red',
+    '#f57c00': 'orange',
+    '#fbc02d': 'yellow',
+    '#388e3c': 'green',
+    '#7b1fa2': 'purple',
+    '#00bcd4': 'cyan',
+    '#e91e63': 'pink'
+  };
+
   const colorMap: Record<string, string> = {};
 
   elementToStageMap.forEach((stageId, guid) => {
     const stage = demolitionStages.find(s => s.id === stageId);
     if (stage) {
-      colorMap[guid] = stage.color.replace('#', '');
+      colorMap[guid] = hexToColorName[stage.color] || stage.color.replace('#', '');
     }
   });
 
