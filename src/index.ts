@@ -61,49 +61,37 @@ function hexToRgba(hex: string, alpha: number): string {
 }
 
 function updateColorCoding() {
-  const hexToColorName: Record<string, string> = {
-    '#0066cc': 'blue',
-    '#d32f2f': 'red',
-    '#f57c00': 'orange',
-    '#fbc02d': 'yellow',
-    '#388e3c': 'green',
-    '#7b1fa2': 'purple',
-    '#00bcd4': 'cyan',
-    '#e91e63': 'pink'
+  console.log('Testing color coding with first assigned object...');
+
+  const firstEntry = elementToStageMap.entries().next();
+  if (firstEntry.done) {
+    console.log('No elements assigned');
+    return;
+  }
+
+  const [testGuid, testStageId] = firstEntry.value;
+  const testStage = demolitionStages.find(s => s.id === testStageId);
+
+  if (!testStage) {
+    console.log('Stage not found');
+    return;
+  }
+
+  const testColorMap: Record<string, string> = {
+    [testGuid]: testStage.color.replace('#', '')
   };
 
-  console.log('Applying color coding per stage...');
+  console.log('Test color map:', testColorMap);
+  console.log('Testing with single object GUID:', testGuid);
+  console.log('Testing with color:', testStage.color, '→', testColorMap[testGuid]);
 
-  let coloringPromise: Promise<any> = Promise.resolve();
-
-  demolitionStages.forEach((stage) => {
-    coloringPromise = coloringPromise.then((): Promise<any> => {
-      const guidsInStage: string[] = [];
-      elementToStageMap.forEach((stageId, guid) => {
-        if (stageId === stage.id) {
-          guidsInStage.push(guid);
-        }
-      });
-
-      if (guidsInStage.length === 0) return Promise.resolve() as Promise<any>;
-
-      const colorName = hexToColorName[stage.color] || stage.color.replace('#', '');
-      const colorMap: Record<string, string> = {};
-      guidsInStage.forEach(guid => {
-        colorMap[guid] = colorName;
-      });
-
-      console.log(`Applying ${colorName} to ${guidsInStage.length} elements in stage ${stage.name}`);
-      return window.StreamBIM.colorCodeObjects(colorMap) as Promise<any>;
-    });
-  });
-
-  coloringPromise
-    .then(() => {
-      console.log('All stages colored');
+  window.StreamBIM.resetObjectSearch()
+    .then(() => window.StreamBIM.colorCodeObjects(testColorMap))
+    .then((result: any) => {
+      console.log('colorCodeObjects result:', result);
     })
     .catch((err: any) => {
-      console.error('Failed to apply color coding:', err);
+      console.error('Failed:', err);
     });
 }
 
