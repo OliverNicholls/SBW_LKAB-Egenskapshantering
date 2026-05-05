@@ -92,8 +92,8 @@ function renderHeader(): string {
       <h1 style="margin: 0; font-size: 18px; color: #333; font-weight: 600;">Data Supplementor</h1>
       <div style="display: flex; gap: 12px; align-items: center;">
         <div style="display: flex; gap: 8px;">
-          <button data-action="set-language" data-language="en" style="padding: 6px; background: ${currentLanguage === 'en' ? '#e3f2fd' : 'transparent'}; border: ${currentLanguage === 'en' ? '2px solid #0066cc' : '2px solid transparent'}; cursor: pointer; font-size: 18px; transition: all 0.2s; border-radius: 4px;" title="English">🇬🇧</button>
-          <button data-action="set-language" data-language="sv" style="padding: 6px; background: ${currentLanguage === 'sv' ? '#e3f2fd' : 'transparent'}; border: ${currentLanguage === 'sv' ? '2px solid #0066cc' : '2px solid transparent'}; cursor: pointer; font-size: 18px; transition: all 0.2s; border-radius: 4px;" title="Svenska">🇸🇪</button>
+          <button data-action="set-language" data-language="en" style="padding: 4px; background: ${currentLanguage === 'en' ? '#e3f2fd' : 'transparent'}; border: ${currentLanguage === 'en' ? '2px solid #0066cc' : '2px solid transparent'}; cursor: pointer; transition: all 0.2s; border-radius: 4px; display: flex; align-items: center;" title="English"><img src="./icons8-united-kingdom-50.png" alt="English" style="width: 28px; height: 28px; display: block;"></button>
+          <button data-action="set-language" data-language="sv" style="padding: 4px; background: ${currentLanguage === 'sv' ? '#e3f2fd' : 'transparent'}; border: ${currentLanguage === 'sv' ? '2px solid #0066cc' : '2px solid transparent'}; cursor: pointer; transition: all 0.2s; border-radius: 4px; display: flex; align-items: center;" title="Svenska"><img src="./icons8-sweden-50.png" alt="Swedish" style="width: 28px; height: 28px; display: block;"></button>
         </div>
         ${selectedElements.size > 0 ? `<button data-action="clear-all" style="padding: 8px 16px; background: #f44336; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 13px; font-weight: 600; transition: background-color 0.2s;">Clear All</button>` : ''}
       </div>
