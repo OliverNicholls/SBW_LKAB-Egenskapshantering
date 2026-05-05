@@ -62,7 +62,6 @@ function hexToRgba(hex: string, alpha: number): string {
 
 function updateColorCoding() {
   const colorMap: Record<string, string> = {};
-  const legends: Record<string, string> = {};
 
   elementToStageMap.forEach((stageId, guid) => {
     const stage = demolitionStages.find(s => s.id === stageId);
@@ -71,17 +70,12 @@ function updateColorCoding() {
     }
   });
 
-  demolitionStages.forEach((stage) => {
-    legends[stage.name] = stage.color;
-  });
-
   console.log('Color map to apply:', colorMap);
-  console.log('Legends:', legends);
-  console.log('Calling colorCodeObjectsWithLegends()...');
+  console.log('Calling colorCodeObjects()...');
 
-  window.StreamBIM.colorCodeObjectsWithLegends({ data: colorMap, legends })
+  window.StreamBIM.colorCodeObjects(colorMap)
     .then((result: any) => {
-      console.log('colorCodeObjectsWithLegends result:', result);
+      console.log('colorCodeObjects result:', result);
     })
     .catch((err: any) => {
       console.error('Failed to apply color coding:', err);
