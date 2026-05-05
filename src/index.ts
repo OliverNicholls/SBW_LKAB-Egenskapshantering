@@ -7,6 +7,18 @@ let pinnedPsets: Set<string> = new Set();
 let activeTab: 'properties' | 'demolition-stages' | 'demolition-sequence' = 'properties';
 let demolitionStages: Array<{ id: string; name: string; order_index: number; color: string }> = [];
 let elementToStageMap: Map<string, string> = new Map();
+let currentLanguage: 'en' | 'sv' = 'en';
+
+function loadLanguage() {
+  const stored = localStorage.getItem('appLanguage');
+  if (stored === 'sv' || stored === 'en') {
+    currentLanguage = stored;
+  }
+}
+
+function saveLanguage() {
+  localStorage.setItem('appLanguage', currentLanguage);
+}
 
 function loadPinnedPsets() {
   const stored = localStorage.getItem('pinnedPsets');
@@ -77,8 +89,14 @@ function updateColorCoding() {
 function renderHeader(): string {
   return `
     <div style="padding: 20px; background: #f5f5f5; border-bottom: 1px solid #ddd; display: flex; justify-content: space-between; align-items: center;">
-      <h1 style="margin: 0; font-size: 18px; color: #333; font-weight: 600;">StreamBIM Widget</h1>
-      ${selectedElements.size > 0 ? `<button data-action="clear-all" style="padding: 8px 16px; background: #f44336; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 13px; font-weight: 600; transition: background-color 0.2s;">Clear All</button>` : ''}
+      <h1 style="margin: 0; font-size: 18px; color: #333; font-weight: 600;">Data Supplementor</h1>
+      <div style="display: flex; gap: 12px; align-items: center;">
+        <div style="display: flex; gap: 4px; border: 1px solid #ddd; border-radius: 4px; background: white; padding: 2px;">
+          <button data-action="set-language" data-language="en" style="padding: 8px 12px; background: ${currentLanguage === 'en' ? '#0066cc' : 'transparent'}; color: ${currentLanguage === 'en' ? 'white' : '#666'}; border: none; cursor: pointer; font-size: 13px; font-weight: 600; transition: all 0.2s; border-radius: 2px;">🇬🇧 EN</button>
+          <button data-action="set-language" data-language="sv" style="padding: 8px 12px; background: ${currentLanguage === 'sv' ? '#0066cc' : 'transparent'}; color: ${currentLanguage === 'sv' ? 'white' : '#666'}; border: none; cursor: pointer; font-size: 13px; font-weight: 600; transition: all 0.2s; border-radius: 2px;">🇸🇪 SV</button>
+        </div>
+        ${selectedElements.size > 0 ? `<button data-action="clear-all" style="padding: 8px 16px; background: #f44336; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 13px; font-weight: 600; transition: background-color 0.2s;">Clear All</button>` : ''}
+      </div>
     </div>
     <div style="display: flex; gap: 0; border-bottom: 1px solid #ddd; background: white; padding: 0;">
       <button data-tab="properties" style="flex: 1; padding: 14px 16px; background: ${activeTab === 'properties' ? 'white' : '#f5f5f5'}; color: ${activeTab === 'properties' ? '#0066cc' : '#666'}; border: none; border-bottom: ${activeTab === 'properties' ? '3px solid #0066cc' : 'none'}; cursor: pointer; font-size: 13px; font-weight: 600; transition: all 0.2s;">
@@ -397,7 +415,14 @@ function setupEventListeners() {
       const action = (e.target as HTMLElement).getAttribute('data-action');
       const target = e.target as HTMLElement;
 
-      if (action === 'clear-all') {
+      if (action === 'set-language') {
+        const lang = target.getAttribute('data-language');
+        if (lang === 'en' || lang === 'sv') {
+          currentLanguage = lang;
+          saveLanguage();
+          renderUI();
+        }
+      } else if (action === 'clear-all') {
         selectedElements.clear();
         selectedObjectInfoMap.clear();
         elementToStageMap.clear();
@@ -612,6 +637,7 @@ function setupEventListeners() {
   });
 }
 
+loadLanguage();
 loadPinnedPsets();
 loadDemolitionData();
 
