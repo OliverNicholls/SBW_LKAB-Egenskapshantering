@@ -66,7 +66,7 @@ function updateColorCoding() {
   elementToStageMap.forEach((stageId, guid) => {
     const stage = demolitionStages.find(s => s.id === stageId);
     if (stage) {
-      colorMap[guid] = stage.color;
+      colorMap[guid] = stage.color.replace('#', '');
     }
   });
 
