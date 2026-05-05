@@ -38,7 +38,8 @@
       "Bash(cp node_modules/streambim-widget-api/dist/streambim-widget-api.min.js public/lib/)",
       "Bash(curl -s \"https://lkab.com/wp-content/themes/bz-app-theme/assets/images/logotypes/LKAB_logo_white.svg\" -o LKAB_logo_white.svg)",
       "Bash(git commit *)",
-      "Read(//c/Users/oliver.nicholls/OneDrive - Tikab Strukturmekanik AB/Dokument/Tikab/Utvecklingnskapshantering/src/**)"
+      "Read(//c/Users/oliver.nicholls/OneDrive - Tikab Strukturmekanik AB/Dokument/Tikab/Utvecklingnskapshantering/src/**)",
+      "Bash(curl -s http://localhost:5173)"
     ],
     "additionalDirectories": [
       "c:\\c\\Users\\oliver.nicholls\\OneDrive - Tikab Strukturmekanik AB\\Dokument\\Tikab\\Utveckling\\0009_Egenskapshantering"
