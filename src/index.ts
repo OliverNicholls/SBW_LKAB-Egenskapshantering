@@ -1,5 +1,6 @@
 const app = document.getElementById('app')!;
 
+let currentApp: 'menu' | 'data-configurator' | 'meeting-planner' = 'menu';
 let selectedElements: Map<string, any> = new Map();
 let selectedObjectInfoMap: Map<string, any> = new Map();
 let expandedGroups: Set<string> = new Set();
@@ -378,14 +379,80 @@ function renderFooter(): string {
   `;
 }
 
+function renderMenu(): string {
+  return `
+    <div style="display: flex; flex-direction: column; height: 100vh; background: #f5f5f5;">
+      <div style="padding: 40px 20px; background: white; border-bottom: 1px solid #ddd; text-align: center;">
+        <h1 style="margin: 0 0 8px 0; font-size: 28px; color: #333; font-weight: 600;">Tikab Management Suite</h1>
+        <p style="margin: 0; font-size: 14px; color: #666;">Select a tool to get started</p>
+      </div>
+      <div style="flex: 1; display: flex; align-items: center; justify-content: center; padding: 40px 20px;">
+        <div style="display: flex; gap: 20px; max-width: 800px; width: 100%;">
+          <button data-app="data-configurator" style="flex: 1; padding: 40px 20px; background: white; border: 2px solid #0066cc; border-radius: 8px; cursor: pointer; transition: all 0.3s; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+            <div style="font-size: 48px; margin-bottom: 16px;">⚙️</div>
+            <div style="font-size: 18px; font-weight: 600; color: #333; margin-bottom: 8px;">Data Configurator</div>
+            <div style="font-size: 13px; color: #666;">Manage properties, demolition stages, and sequencing</div>
+          </button>
+          <button data-app="meeting-planner" style="flex: 1; padding: 40px 20px; background: white; border: 2px solid #4caf50; border-radius: 8px; cursor: pointer; transition: all 0.3s; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+            <div style="font-size: 48px; margin-bottom: 16px;">📅</div>
+            <div style="font-size: 18px; font-weight: 600; color: #333; margin-bottom: 8px;">Meeting Planner</div>
+            <div style="font-size: 13px; color: #666;">Schedule and manage project meetings</div>
+          </button>
+        </div>
+      </div>
+      ${renderFooter()}
+    </div>
+  `;
+}
+
+function renderMeetingPlanner(): string {
+  return `
+    <div style="display: flex; flex-direction: column; height: 100vh; background: white;">
+      <div style="padding: 20px; background: #f5f5f5; border-bottom: 1px solid #ddd; display: flex; justify-content: space-between; align-items: center;">
+        <h1 style="margin: 0; font-size: 18px; color: #333; font-weight: 600;">Meeting Planner</h1>
+        <button data-app="menu" style="padding: 8px 16px; background: #6b7280; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 13px; font-weight: 600; transition: background-color 0.2s;">← Back to Menu</button>
+      </div>
+      <div style="flex: 1; overflow-y: auto; padding: 40px 20px; display: flex; align-items: center; justify-content: center;">
+        <div style="text-align: center; max-width: 600px;">
+          <div style="font-size: 64px; margin-bottom: 20px;">📅</div>
+          <h2 style="margin: 0 0 12px 0; font-size: 20px; color: #333; font-weight: 600;">Meeting Planner</h2>
+          <p style="margin: 0; font-size: 14px; color: #666;">Schedule and manage project meetings, track attendees, and coordinate demolition project timelines.</p>
+          <div style="margin-top: 30px; display: flex; flex-direction: column; gap: 12px;">
+            <button style="padding: 12px 20px; background: #4caf50; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 13px; font-weight: 600;">+ New Meeting</button>
+            <button style="padding: 12px 20px; background: #2196f3; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 13px; font-weight: 600;">View Calendar</button>
+          </div>
+        </div>
+      </div>
+      ${renderFooter()}
+    </div>
+  `;
+}
+
 function renderUI() {
   let content = '';
-  if (activeTab === 'properties') {
-    content = renderPropertiesTab();
-  } else if (activeTab === 'demolition-stages') {
-    content = renderDemolitionStagesTab();
-  } else {
-    content = renderDemolitionSequencingTab();
+
+  if (currentApp === 'menu') {
+    content = renderMenu();
+  } else if (currentApp === 'data-configurator') {
+    if (activeTab === 'properties') {
+      content = renderPropertiesTab();
+    } else if (activeTab === 'demolition-stages') {
+      content = renderDemolitionStagesTab();
+    } else {
+      content = renderDemolitionSequencingTab();
+    }
+
+    content = `
+      <div style="display: flex; flex-direction: column; height: 100vh; background: white;">
+        ${renderHeader()}
+        <div style="flex: 1; overflow-y: auto; display: flex; flex-direction: column;">
+          ${content}
+        </div>
+        ${renderFooter()}
+      </div>
+    `;
+  } else if (currentApp === 'meeting-planner') {
+    content = renderMeetingPlanner();
   }
 
   app.innerHTML = `
@@ -398,14 +465,12 @@ function renderUI() {
       .stage-assigned-pulse {
         animation: pulse 0.6s ease-out;
       }
+      button[data-app]:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15) !important;
+      }
     </style>
-    <div style="display: flex; flex-direction: column; height: 100vh; background: white;">
-      ${renderHeader()}
-      <div style="flex: 1; overflow-y: auto; display: flex; flex-direction: column;">
-        ${content}
-      </div>
-      ${renderFooter()}
-    </div>
+    ${content}
   `;
   setupEventListeners();
 }
@@ -415,6 +480,14 @@ function generateId(): string {
 }
 
 function setupEventListeners() {
+  document.querySelectorAll('[data-app]').forEach((btn) => {
+    btn.addEventListener('click', (e) => {
+      const app_val = (e.target as HTMLElement).getAttribute('data-app') as 'menu' | 'data-configurator' | 'meeting-planner';
+      currentApp = app_val;
+      renderUI();
+    });
+  });
+
   document.querySelectorAll('[data-tab]').forEach((btn) => {
     btn.addEventListener('click', (e) => {
       const tab = (e.target as HTMLElement).getAttribute('data-tab') as 'properties' | 'demolition-stages' | 'demolition-sequence';
@@ -656,6 +729,8 @@ loadDemolitionData();
 
 window.StreamBIM.connect({
   pickedObject: (element: any) => {
+    if (currentApp !== 'data-configurator') return;
+
     console.log('Element selected:', element);
 
     if (!element.shiftKey) {
@@ -685,7 +760,7 @@ window.StreamBIM.connect({
   }
 }).then(() => {
   renderUI();
-  // Don't call updateColorCoding on launch - only on explicit button click
+  // Start with menu, allow navigation to Data Configurator
   console.log('StreamBIM connected');
 }).catch((error: any) => {
   console.error('Failed to connect to StreamBIM:', error);
