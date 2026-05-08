@@ -383,8 +383,8 @@ function renderMenu(): string {
   return `
     <div style="display: flex; flex-direction: column; height: 100vh; background: #f5f5f5;">
       <div style="padding: 40px 20px; background: white; border-bottom: 1px solid #ddd; text-align: center;">
-        <h1 style="margin: 0 0 8px 0; font-size: 28px; color: #333; font-weight: 600;">Tikab Management Suite</h1>
-        <p style="margin: 0; font-size: 14px; color: #666;">Select a tool to get started</p>
+        <h1 style="margin: 0 0 8px 0; font-size: 28px; color: #333; font-weight: 600;">Tikab Toolbox</h1>
+        <p style="margin: 0; font-size: 14px; color: #666;">Choose a tool to get started</p>
       </div>
       <div style="flex: 1; display: flex; align-items: center; justify-content: center; padding: 40px 20px;">
         <div style="display: flex; gap: 20px; max-width: 800px; width: 100%;">
